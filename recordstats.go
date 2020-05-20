@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 
 	pbg "github.com/brotherlogic/goserver/proto"
+	rcpb "github.com/brotherlogic/recordcollection/proto"
 	ropb "github.com/brotherlogic/recordsorganiser/proto"
 )
 
@@ -55,6 +56,31 @@ func (s *Server) GetState() []*pbg.State {
 	return []*pbg.State{}
 }
 
+func (s *Server) getInstanceIds(ctx context.Context, folder int32) ([]int32, error) {
+	if s.Testing {
+		return []int32{12, 13}, nil
+	}
+
+	conn, err := s.NewBaseDial("recordcollection")
+	if err != nil {
+		return []int32{}, nil
+	}
+	defer conn.Close()
+
+	client := rcpb.NewRecordCollectionServiceClient(conn)
+	ids, err := client.QueryRecords(ctx, &rcpb.QueryRecordsRequest{Query: &rcpb.QueryRecordsRequest_FolderId{int32(folder)}})
+	if err != nil {
+		return []int32{}, nil
+	}
+
+	iids := []int32{}
+	for _, id := range ids.GetInstanceIds() {
+		iids = append(iids, id)
+	}
+
+	return iids, nil
+}
+
 func (s *Server) getPhysicalFolders(ctx context.Context) ([]int32, error) {
 	if s.Testing {
 		return []int32{12, 13}, nil
@@ -79,6 +105,25 @@ func (s *Server) getPhysicalFolders(ctx context.Context) ([]int32, error) {
 	}
 
 	return folders, nil
+}
+
+func (s *Server) getRecord(ctx context.Context, iid int32) (*rcpb.Record, error) {
+	if s.Testing {
+		return &rcpb.Record{Metadata: &rcpb.ReleaseMetadata{}}, nil
+	}
+	conn, err := s.NewBaseDial("recordcollection")
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := rcpb.NewRecordCollectionServiceClient(conn)
+	res, err := client.GetRecord(ctx, &rcpb.GetRecordRequest{InstanceId: iid})
+	if err != nil {
+		return nil, err
+	}
+
+	return res.GetRecord(), nil
 }
 
 func main() {
