@@ -12,11 +12,13 @@ import (
 	"google.golang.org/grpc"
 
 	pbg "github.com/brotherlogic/goserver/proto"
+	ropb "github.com/brotherlogic/recordsorganiser/proto"
 )
 
 //Server main server type
 type Server struct {
 	*goserver.GoServer
+	Testing bool
 }
 
 // Init builds the server
@@ -50,6 +52,31 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 // GetState gets the state of the server
 func (s *Server) GetState() []*pbg.State {
 	return []*pbg.State{}
+}
+
+func (s *Server) getPhysicalFolders(ctx context.Context) ([]int32, error) {
+	if s.Testing {
+		return []int32{12, 13}, nil
+	}
+	conn, err := s.NewBaseDial("discovery:///recordsorganiser")
+	if err != nil {
+		return []int32{}, err
+	}
+
+	client := ropb.NewOrganiserServiceClient(conn)
+	res, err := client.GetOrganisation(ctx, &ropb.GetOrganisationRequest{})
+	if err != nil {
+		return []int32{}, err
+	}
+
+	folders := []int32{}
+	for _, location := range res.GetLocations() {
+		if location.GetMediaType() == ropb.Location_PHYSICAL {
+			folders = append(folders, location.GetFolderIds()...)
+		}
+	}
+
+	return folders, nil
 }
 
 func main() {
