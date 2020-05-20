@@ -8,6 +8,7 @@ import (
 func InitTest() *Server {
 	s := Init()
 	s.SkipLog = true
+	s.Testing = true
 	return s
 }
 
