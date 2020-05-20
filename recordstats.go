@@ -66,7 +66,7 @@ func main() {
 	server.PrepServer()
 	server.Register = server
 
-	err := server.RegisterServerV2("basicjob", false, false)
+	err := server.RegisterServerV2("recordstats", false, false)
 	if err != nil {
 		return
 	}
