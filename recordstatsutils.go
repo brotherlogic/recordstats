@@ -53,5 +53,9 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 	s.Log(fmt.Sprintf("Found %v - %v", r.GetRelease().GetInstanceId(), r.GetRelease().GetTitle()))
 	oldest.Set(float64(oldestTime))
 
+	if time.Now().Sub(time.Unix(oldestTime, 0)) > time.Hour*24*365*2 {
+		s.RaiseIssue(ctx, "Haven't Listened", fmt.Sprintf("Haven't listened to %v in a while", r.GetRelease().GetInstanceId()), false)
+	}
+
 	return nil
 }
