@@ -26,7 +26,7 @@ var (
 func (s *Server) computeOldest(ctx context.Context) (err error) {
 	folders, err := s.getPhysicalFolders(ctx)
 	oldestTime := time.Now().Unix()
-	var r rcpb.Record
+	var r *rcpb.Record
 	if err == nil {
 		s.Log(fmt.Sprintf("Folders = %v", folders))
 
