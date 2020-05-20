@@ -25,23 +25,27 @@ var (
 
 func (s *Server) computeOldest(ctx context.Context) (err error) {
 	folders, err := s.getPhysicalFolders(ctx)
+	if err != nil {
+		return err
+	}
 	oldestTime := time.Now().Unix()
 	var r *rcpb.Record
-	if err == nil {
-		s.Log(fmt.Sprintf("Folders = %v", folders))
+	s.Log(fmt.Sprintf("Folders = %v", folders))
 
-		for _, folder := range folders {
-			ids, err2 := s.getInstanceIds(ctx, folder)
-			err = err2
-			if err == nil {
-				for _, id := range ids {
-					rec, err3 := s.getRecord(ctx, id)
-					err = err3
-					if rec.GetMetadata().GetLastListenTime() < oldestTime {
-						oldestTime = rec.GetMetadata().GetLastListenTime()
-						r = rec
-					}
-				}
+	for _, folder := range folders {
+		ids, err := s.getInstanceIds(ctx, folder)
+		if err != nil {
+			return err
+		}
+
+		for _, id := range ids {
+			rec, err := s.getRecord(ctx, id)
+			if err != nil {
+				return err
+			}
+			if rec.GetMetadata().GetLastListenTime() < oldestTime {
+				oldestTime = rec.GetMetadata().GetLastListenTime()
+				r = rec
 			}
 		}
 	}
@@ -49,5 +53,5 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 	s.Log(fmt.Sprintf("Found %v - %v", r.GetRelease().GetInstanceId(), r.GetRelease().GetTitle()))
 	oldest.Set(float64(oldestTime))
 
-	return err
+	return nil
 }
