@@ -26,5 +26,5 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 		s.Log(fmt.Sprintf("Folders = %v", folders))
 	}
 
-	return nil
+	return err
 }
