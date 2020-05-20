@@ -7,6 +7,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/net/context"
+
+	rcpb "github.com/brotherlogic/recordcollection/proto"
 )
 
 var (
@@ -24,6 +26,7 @@ var (
 func (s *Server) computeOldest(ctx context.Context) (err error) {
 	folders, err := s.getPhysicalFolders(ctx)
 	oldestTime := time.Now().Unix()
+	var r rcpb.Record
 	if err == nil {
 		s.Log(fmt.Sprintf("Folders = %v", folders))
 
@@ -36,12 +39,14 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 					err = err3
 					if rec.GetMetadata().GetLastListenTime() < oldestTime {
 						oldestTime = rec.GetMetadata().GetLastListenTime()
+						r = rec
 					}
 				}
 			}
 		}
 	}
 
+	s.Log(fmt.Sprintf("Found %v - %v", r.GetRelease().GetInstanceId(), r.GetRelease().GetTitle()))
 	oldest.Set(float64(oldestTime))
 
 	return err
