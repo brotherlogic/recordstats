@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"testing"
 )
 
@@ -11,5 +12,6 @@ func InitTest() *Server {
 }
 
 func TestBasic(t *testing.T) {
-	doNothing()
+	s := InitTest()
+	s.computeOldest(context.Background())
 }
