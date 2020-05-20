@@ -59,6 +59,7 @@ func (s *Server) getPhysicalFolders(ctx context.Context) ([]int32, error) {
 		return []int32{12, 13}, nil
 	}
 	conn, err := s.NewBaseDial("discovery:///recordsorganiser")
+	defer conn.Close()
 	if err != nil {
 		return []int32{}, err
 	}
