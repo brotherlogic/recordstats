@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"time"
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
@@ -98,6 +99,8 @@ func main() {
 	if err != nil {
 		return
 	}
+
+	server.RegisterRepeatingTask(server.computeOldest, "compute_oldest", time.Minute)
 
 	fmt.Printf("%v", server.Serve())
 }
