@@ -54,7 +54,7 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 	oldest.Set(float64(oldestTime))
 
 	if time.Now().Sub(time.Unix(oldestTime, 0)) > time.Hour*24*365*2 {
-		s.RaiseIssue(ctx, "Haven't Listened", fmt.Sprintf("Haven't listened to %v in a while", r.GetRelease().GetInstanceId()), false)
+		s.RaiseIssue(ctx, "Haven't Listened", fmt.Sprintf("Haven't listened to %v in a while (since %v)", r.GetRelease().GetInstanceId(), time.Unix(r.GetMetadata().GetLastListenTime(), 0)), false)
 	}
 
 	return nil
