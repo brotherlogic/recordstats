@@ -145,7 +145,7 @@ func main() {
 		return
 	}
 
-	server.RegisterRepeatingTask(server.computeOldest, "compute_oldest", time.Minute)
+	server.RegisterRepeatingTask(server.computeOldest, "compute_oldest", time.Hour)
 
 	fmt.Printf("%v", server.Serve())
 }
