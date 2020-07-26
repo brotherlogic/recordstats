@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package recordstats;
+
+option go_package = "github.com/brotherlogic/recordstats/proto";
+
+message Config {
+  int64 last_listen_time = 1;
+}
