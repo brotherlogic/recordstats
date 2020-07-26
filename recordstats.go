@@ -8,13 +8,14 @@ import (
 	"time"
 
 	"github.com/brotherlogic/goserver"
-	"github.com/brotherlogic/keystore/client"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pbg "github.com/brotherlogic/goserver/proto"
+	"github.com/brotherlogic/goserver/utils"
 	rcpb "github.com/brotherlogic/recordcollection/proto"
 	ropb "github.com/brotherlogic/recordsorganiser/proto"
+	pb "github.com/brotherlogic/recordstats/proto"
 )
 
 //Server main server type
@@ -33,7 +34,7 @@ func Init() *Server {
 
 // DoRegister does RPC registration
 func (s *Server) DoRegister(server *grpc.Server) {
-
+	rcpb.RegisterClientUpdateServiceServer(server, s)
 }
 
 // ReportHealth alerts if we're not healthy
@@ -136,16 +137,23 @@ func main() {
 		log.SetOutput(ioutil.Discard)
 	}
 	server := Init()
-	server.GoServer.KSclient = *keystoreclient.GetClient(server.DialMaster)
 	server.PrepServer()
 	server.Register = server
 
-	err := server.RegisterServerV2("recordstats", false, false)
+	err := server.RegisterServerV2("recordstats", false, true)
 	if err != nil {
 		return
 	}
 
-	server.RegisterRepeatingTask(server.computeOldest, "compute_oldest", time.Hour)
+	ctx, cancel := utils.ManualContext("recordbudget-startup", "recordbudget-startup", time.Minute, true)
+	data, _, err := server.KSclient.Read(ctx, CONFIG, &pb.Config{})
+	if err != nil {
+		log.Fatalf("Unable to load config: %v", err)
+	}
+	config := data.(*pb.Config)
+	cancel()
+
+	oldest.Set(float64(config.LastListenTime))
 
 	fmt.Printf("%v", server.Serve())
 }

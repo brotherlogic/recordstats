@@ -9,6 +9,7 @@ import (
 	"golang.org/x/net/context"
 
 	rcpb "github.com/brotherlogic/recordcollection/proto"
+	pb "github.com/brotherlogic/recordstats/proto"
 )
 
 var (
@@ -22,6 +23,31 @@ var (
 		Help: "The number of records processed",
 	})
 )
+
+const (
+	// CONFIG - where we store the stats config
+	CONFIG = "/github.com/brotherlogic/recordstats/config"
+)
+
+func (s *Server) update(ctx context.Context, id int32) error {
+	data, _, err := s.KSclient.Read(ctx, CONFIG, &pb.Config{})
+	if err != nil {
+		return err
+	}
+	config := data.(*pb.Config)
+
+	rec, err := s.getRecord(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if rec.GetMetadata().GetLastListenTime() < config.GetLastListenTime() {
+		config.LastListenTime = rec.GetMetadata().GetLastListenTime()
+		oldest.Set(float64(config.LastListenTime))
+	}
+
+	return s.KSclient.Save(ctx, CONFIG, config)
+}
 
 func (s *Server) computeOldest(ctx context.Context) (err error) {
 	folders, err := s.getPhysicalFolders(ctx)
@@ -52,10 +78,6 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 
 	s.Log(fmt.Sprintf("Found %v - %v", r.GetRelease().GetInstanceId(), r.GetRelease().GetTitle()))
 	oldest.Set(float64(oldestTime))
-
-	if time.Now().Sub(time.Unix(oldestTime, 0)) > time.Hour*24*365*2 {
-		s.RaiseIssue(ctx, "Haven't Listened", fmt.Sprintf("Haven't listened to %v in a while (since %v)", r.GetRelease().GetInstanceId(), time.Unix(r.GetMetadata().GetLastListenTime(), 0)), false)
-	}
 
 	return nil
 }
