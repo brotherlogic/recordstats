@@ -155,10 +155,11 @@ func main() {
 		log.Fatalf("Unable to load config: %v", err)
 	}
 	if code.Code() == codes.InvalidArgument {
-		config = data.(*pb.Config)
 		config.LastListenTime = time.Now().Unix()
 		err := server.KSclient.Save(ctx, CONFIG, config)
 		server.Log(fmt.Sprintf("Written new config: %v", err))
+	} else {
+		config = data.(*pb.Config)
 	}
 	cancel()
 
