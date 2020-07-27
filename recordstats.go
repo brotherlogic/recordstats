@@ -158,6 +158,7 @@ func main() {
 		config = data.(*pb.Config)
 		config.LastListenTime = time.Now().Unix()
 		err := server.KSclient.Save(ctx, CONFIG, config)
+		server.Log(fmt.Sprintf("Written new config: %v", err))
 	}
 	cancel()
 
