@@ -10,6 +10,8 @@ import (
 	"github.com/brotherlogic/goserver"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	pbg "github.com/brotherlogic/goserver/proto"
 	"github.com/brotherlogic/goserver/utils"
@@ -147,10 +149,14 @@ func main() {
 
 	ctx, cancel := utils.ManualContext("recordbudget-startup", "recordbudget-startup", time.Minute, true)
 	data, _, err := server.KSclient.Read(ctx, CONFIG, &pb.Config{})
-	if err != nil {
+	code := status.Convert(err)
+	config := &pb.Config{}
+	if code.Code() != codes.InvalidArgument && code.Code() != codes.OK {
 		log.Fatalf("Unable to load config: %v", err)
 	}
-	config := data.(*pb.Config)
+	if code.Code() != codes.InvalidArgument {
+		config = data.(*pb.Config)
+	}
 	cancel()
 
 	oldest.Set(float64(config.LastListenTime))
