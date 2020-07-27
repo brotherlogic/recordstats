@@ -41,7 +41,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		return err
 	}
 
-	if rec.GetMetadata().GetLastListenTime() < config.GetLastListenTime() && rec.GetMetadata().GetLastListemTime() > 0 {
+	if rec.GetMetadata().GetLastListenTime() < config.GetLastListenTime() && rec.GetMetadata().GetLastListenTime() > 0 {
 		config.LastListenTime = rec.GetMetadata().GetLastListenTime()
 		oldest.Set(float64(config.LastListenTime))
 		return s.KSclient.Save(ctx, CONFIG, config)
