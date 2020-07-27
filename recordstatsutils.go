@@ -36,6 +36,8 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	}
 	config := data.(*pb.Config)
 
+	s.Log(fmt.Sprintf("Read: %v", config))
+
 	rec, err := s.getRecord(ctx, id)
 	if err != nil {
 		return err
