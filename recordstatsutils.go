@@ -36,19 +36,17 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	}
 	config := data.(*pb.Config)
 
-	s.Log(fmt.Sprintf("Read: %v", config))
-
 	rec, err := s.getRecord(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	if rec.GetMetadata().GetLastListenTime() < config.GetLastListenTime() {
+	if rec.GetMetadata().GetLastListenTime() < config.GetLastListenTime() && rec.GetMetadata().GetLastListemTime() > 0 {
 		config.LastListenTime = rec.GetMetadata().GetLastListenTime()
 		oldest.Set(float64(config.LastListenTime))
+		return s.KSclient.Save(ctx, CONFIG, config)
 	}
-
-	return s.KSclient.Save(ctx, CONFIG, config)
+	return nil
 }
 
 func (s *Server) computeOldest(ctx context.Context) (err error) {
