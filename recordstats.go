@@ -154,10 +154,10 @@ func main() {
 	if code.Code() != codes.InvalidArgument && code.Code() != codes.OK {
 		log.Fatalf("Unable to load config: %v", err)
 	}
-	if code.Code() != codes.InvalidArgument {
+	if code.Code() == codes.InvalidArgument {
 		config = data.(*pb.Config)
 		config.LastListenTime = time.Now().Unix()
-		server.KSclient.Save(ctx, CONFIG, config)
+		err := server.KSclient.Save(ctx, CONFIG, config)
 	}
 	cancel()
 
