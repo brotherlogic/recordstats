@@ -64,7 +64,7 @@ func (s *Server) getInstanceIds(ctx context.Context, folder int32) ([]int32, err
 		return []int32{12, 13}, nil
 	}
 
-	conn, err := s.NewBaseDial("recordcollection")
+	conn, err := s.FDialServer(ctx, "recordcollection")
 	if err != nil {
 		return []int32{}, nil
 	}
@@ -88,7 +88,7 @@ func (s *Server) getPhysicalFolders(ctx context.Context) ([]int32, error) {
 	if s.Testing {
 		return []int32{12, 13}, nil
 	}
-	conn, err := s.NewBaseDial("recordsorganiser")
+	conn, err := s.FDialServer(ctx, "recordsorganiser")
 	if err != nil {
 		return []int32{}, err
 	}
@@ -114,7 +114,7 @@ func (s *Server) getRecord(ctx context.Context, iid int32) (*rcpb.Record, error)
 	if s.Testing {
 		return &rcpb.Record{Metadata: &rcpb.ReleaseMetadata{}}, nil
 	}
-	conn, err := s.NewBaseDial("recordcollection")
+	conn, err := s.FDialServer(ctx, "recordcollection")
 	if err != nil {
 		return nil, err
 	}
