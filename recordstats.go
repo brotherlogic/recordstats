@@ -152,6 +152,10 @@ func main() {
 	code := status.Convert(err)
 	config := &pb.Config{}
 	if code.Code() != codes.InvalidArgument && code.Code() != codes.OK {
+		//Silent crash
+		if code.Code() == codes.DeadlineExceeded {
+			return
+		}
 		log.Fatalf("Unable to load config: %v", err)
 	}
 	if code.Code() == codes.InvalidArgument {
