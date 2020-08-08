@@ -86,7 +86,7 @@ func (s *Server) getInstanceIds(ctx context.Context, folder int32) ([]int32, err
 
 func (s *Server) getPhysicalFolders(ctx context.Context) ([]int32, error) {
 	if s.Testing {
-		return []int32{12, 13}, nil
+		return []int32{12, 13, 14}, nil
 	}
 	conn, err := s.FDialServer(ctx, "recordsorganiser")
 	if err != nil {
