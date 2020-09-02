@@ -152,8 +152,9 @@ func main() {
 	code := status.Convert(err)
 	config := &pb.Config{}
 	if code.Code() != codes.InvalidArgument && code.Code() != codes.OK {
-		//Silent crash
-		if code.Code() == codes.DeadlineExceeded {
+
+		//Silent crash - if we can't reach keystore, or it's not found
+		if code.Code() == codes.DeadlineExceeded || code.Code() == codes.NotFound {
 			return
 		}
 		log.Fatalf("Unable to load config: %v", err)
