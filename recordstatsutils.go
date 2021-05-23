@@ -22,6 +22,16 @@ var (
 		Name: "recordstats_processed",
 		Help: "The number of records processed",
 	})
+
+	totalSales = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_total_sales",
+		Help: "The number of records processed",
+	})
+
+	totalCompleteSales = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_total_sales_complete",
+		Help: "The number of records processed",
+	})
 )
 
 const (
@@ -41,12 +51,49 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		return err
 	}
 
+	if rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_SOLD_ARCHIVE {
+		found := false
+		for _, entry := range config.GetCompleteSales() {
+			if entry.GetInstanceId() == rec.GetRelease().GetInstanceId() {
+				found = true
+				entry.HasCost = rec.GetMetadata().GetSoldPrice() > 0
+			}
+		}
+
+		if !found {
+			config.CompleteSales = append(config.CompleteSales,
+				&pb.CompleteSale{
+					InstanceId: rec.GetRelease().GetInstanceId(),
+					HasCost:    rec.GetMetadata().GetSoldPrice() > 0,
+				})
+		}
+	} else {
+		var centries []*pb.CompleteSale
+		for _, entry := range config.GetCompleteSales() {
+			if entry.GetInstanceId() != rec.GetRelease().GetInstanceId() {
+				centries = append(centries, entry)
+			}
+		}
+		config.CompleteSales = centries
+	}
+
+	completes := 0
+	fullCompletes := 0
+	for _, entry := range config.GetCompleteSales() {
+		completes++
+		if entry.HasCost {
+			fullCompletes++
+		}
+	}
+	totalSales.Set(float64(completes))
+	totalCompleteSales.Set(float64(fullCompletes))
+
 	if rec.GetMetadata().GetLastListenTime() < config.GetLastListenTime() && rec.GetMetadata().GetLastListenTime() > 0 {
 		config.LastListenTime = rec.GetMetadata().GetLastListenTime()
 		oldest.Set(float64(config.LastListenTime))
-		return s.KSclient.Save(ctx, CONFIG, config)
 	}
-	return nil
+
+	return s.KSclient.Save(ctx, CONFIG, config)
 }
 
 func (s *Server) computeOldest(ctx context.Context) (err error) {
