@@ -32,6 +32,15 @@ var (
 		Name: "recordstats_total_sales_complete",
 		Help: "The number of records processed",
 	})
+
+	totalToAuditions = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_total_to_be_auditioned",
+		Help: "The number of records processed",
+	})
+	totalAuditions = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_total_auditioned",
+		Help: "The number of records processed",
+	})
 )
 
 const (
@@ -45,10 +54,41 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		return err
 	}
 	config := data.(*pb.Config)
+	defer func() {
+		tA := 0
+		tAA := 0
+		for _, auditioned := range config.GetAuditions() {
+			if auditioned.GetValid() {
+				tA++
+				if auditioned.GetLastAudition() > 0 {
+					tAA++
+				}
+			}
+		}
+		totalToAuditions.Set(float64(tA))
+		totalAuditions.Set(float64(tAA))
+	}()
 
 	rec, err := s.getRecord(ctx, id)
 	if err != nil {
 		return err
+	}
+
+	found := false
+	for _, aud := range config.GetAuditions() {
+		if aud.GetInstanceId() == id {
+			aud.Valid = rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_IN_COLLECTION
+			aud.LastAudition = rec.GetMetadata().GetLastAudition()
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		config.Auditions = append(config.Auditions, &pb.Auditioned{
+			Valid:        rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_IN_COLLECTION,
+			LastAudition: rec.GetMetadata().GetLastAudition(),
+		})
 	}
 
 	if rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_SOLD_ARCHIVE {

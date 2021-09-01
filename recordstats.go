@@ -147,7 +147,7 @@ func main() {
 		return
 	}
 
-	ctx, cancel := utils.ManualContext("recordbudget-startup", "recordbudget-startup", time.Minute, true)
+	ctx, cancel := utils.ManualContext("recordbudget-startup", time.Minute)
 	data, _, err := server.KSclient.Read(ctx, CONFIG, &pb.Config{})
 	code := status.Convert(err)
 	config := &pb.Config{}

@@ -7,6 +7,13 @@ option go_package = "github.com/brotherlogic/recordstats/proto";
 message Config {
   int64 last_listen_time = 1;
   repeated CompleteSale complete_sales = 2;
+  repeated Auditioned auditions = 3;
+}
+
+message Auditioned {
+  int32 instance_id = 1;
+  bool valid = 2;
+  int64 last_audition = 3;
 }
 
 message CompleteSale {
