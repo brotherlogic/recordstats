@@ -88,6 +88,8 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		totalToAuditions.Set(float64(tA))
 		totalAuditions.Set(float64(tAA))
 
+		s.Log(fmt.Sprintf("FILED: %v", config.GetFiled()))
+
 		tF := float64(0)
 		tUF := float64(0)
 		for _, fu := range config.GetFiled() {
