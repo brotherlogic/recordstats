@@ -41,6 +41,14 @@ var (
 		Name: "recordstats_total_auditioned",
 		Help: "The number of records processed",
 	})
+	totalUnfilled = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_total_to_be_auditioned",
+		Help: "The number of records processed",
+	})
+	totalFilled = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_total_auditioned",
+		Help: "The number of records processed",
+	})
 )
 
 const (
@@ -54,9 +62,15 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		return err
 	}
 	config := data.(*pb.Config)
+
+	if config.GetFiled() == nil {
+		config.Filed = make(map[int32]rcpb.ReleaseMetadata_FileSize)
+	}
+
 	defer func() {
 		tA := 0
 		tAA := 0
+
 		for _, auditioned := range config.GetAuditions() {
 			if auditioned.GetValid() {
 				tA++
@@ -69,12 +83,26 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		}
 		totalToAuditions.Set(float64(tA))
 		totalAuditions.Set(float64(tAA))
+
+		tF := float64(0)
+		tUF := float64(0)
+		for _, fu := range config.GetFiled() {
+			if fu == rcpb.ReleaseMetadata_FILE_UNKNOWN {
+				tUF++
+			} else {
+				tF++
+			}
+		}
+		totalFilled.Set(tF)
+		totalUnfilled.Set(tUF)
 	}()
 
 	rec, err := s.getRecord(ctx, id)
 	if err != nil {
 		return err
 	}
+
+	config.Filed[id] = rec.Metadata.GetFiledUnder()
 
 	found := false
 	for _, aud := range config.GetAuditions() {

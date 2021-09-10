@@ -4,10 +4,13 @@ package recordstats;
 
 option go_package = "github.com/brotherlogic/recordstats/proto";
 
+import "github.com/brotherlogic/recordcollection/proto/recordcollection.proto";
+
 message Config {
   int64 last_listen_time = 1;
   repeated CompleteSale complete_sales = 2;
   repeated Auditioned auditions = 3;
+  map<int32, recordcollection.ReleaseMetadata.FileSize> filed = 4;
 }
 
 message Auditioned {
