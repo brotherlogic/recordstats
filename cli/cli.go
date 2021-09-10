@@ -14,7 +14,7 @@ func main() {
 	ctx2, cancel2 := utils.ManualContext("recordcollectioncli-"+os.Args[1], time.Hour)
 	defer cancel2()
 
-	conn, err := utils.LFDialServer(ctx2, "recordvalidator")
+	conn, err := utils.LFDialServer(ctx2, "recordstats")
 	if err != nil {
 		log.Fatalf("Argh: %v", err)
 	}
@@ -24,7 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Bad: %v", err)
 	} else {
-		return
+		log.Fatalf("Good: %v", err)
 	}
 
 	conn2, err := utils.LFDialServer(ctx2, "recordcollection")
