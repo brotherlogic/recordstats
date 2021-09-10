@@ -103,6 +103,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	}
 
 	config.Filed[id] = rec.Metadata.GetFiledUnder()
+	if rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_SOLD_ARCHIVE {
+		delete(config.Filed, id)
+	}
 
 	found := false
 	for _, aud := range config.GetAuditions() {
