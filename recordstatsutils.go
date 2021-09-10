@@ -70,6 +70,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	if config.GetFiled() == nil {
 		config.Filed = make(map[int32]rcpb.ReleaseMetadata_FileSize)
 	}
+	if config.GetFiledTime() == nil {
+		config.FiledTime = make(map[int32]int64)
+	}
 
 	defer func() {
 		tA := 0
