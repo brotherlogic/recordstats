@@ -42,11 +42,15 @@ var (
 		Help: "The number of records processed",
 	})
 	totalUnfilled = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "recordstats_total_to_be_auditioned",
+		Name: "recordstats_unfiled",
 		Help: "The number of records processed",
 	})
 	totalFilled = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "recordstats_total_auditioned",
+		Name: "recordstats_filed",
+		Help: "The number of records processed",
+	})
+	rateFiled = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_filed_rate",
 		Help: "The number of records processed",
 	})
 )
@@ -95,6 +99,14 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		}
 		totalFilled.Set(tF)
 		totalUnfilled.Set(tUF)
+
+		rate := float64(0)
+		for _, t := range config.GetFiledTime() {
+			if time.Since(time.Unix(t, 0)) < time.Hour*24*7 {
+				rate++
+			}
+		}
+		rateFiled.Set(rate / 7)
 	}()
 
 	rec, err := s.getRecord(ctx, id)
@@ -102,9 +114,15 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		return err
 	}
 
+	exist, ok := config.Filed[id]
 	config.Filed[id] = rec.Metadata.GetFiledUnder()
 	if rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_SOLD_ARCHIVE {
 		delete(config.Filed, id)
+		delete(config.FiledTime, id)
+	} else {
+		if (!ok || exist == rcpb.ReleaseMetadata_FILE_UNKNOWN) && rec.GetMetadata().GetFiledUnder() != rcpb.ReleaseMetadata_FILE_UNKNOWN {
+			config.FiledTime[id] = time.Now().Unix()
+		}
 	}
 
 	found := false
