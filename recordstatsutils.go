@@ -57,7 +57,7 @@ var (
 		Name: "recordstats_oldest_lb",
 		Help: "The number of records processed",
 	})
-	oldest = promauto.NewGauge(prometheus.GaugeOpts{
+	oldestLBID = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_oldest_lb_actual",
 		Help: "The number of records processed",
 	})
@@ -133,7 +133,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 		}
 		oldestLB.Set(float64(time.Since(time.Unix(lax, 0)).Seconds()))
-		oldest.Set(float64(id))
+		oldestLBID.Set(float64(id))
 	}()
 
 	rec, err := s.getRecord(ctx, id)
