@@ -227,7 +227,7 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 	}
 	oldestTime := time.Now().Unix()
 	var r *rcpb.Record
-	s.Log(fmt.Sprintf("Folders = %v", folders))
+	s.Log(fmt.Sprintf("Folders are %v", folders))
 
 	for _, folder := range folders {
 		ids, err := s.getInstanceIds(ctx, folder)
