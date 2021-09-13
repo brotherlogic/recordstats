@@ -12,6 +12,7 @@ message Config {
   repeated Auditioned auditions = 3;
   map<int32, recordcollection.ReleaseMetadata.FileSize> filed = 4;
   map<int32, int64> filed_time = 5;
+  map<int32, int64> lb_last_time = 6;
 }
 
 message Auditioned {

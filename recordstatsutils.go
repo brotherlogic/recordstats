@@ -53,6 +53,10 @@ var (
 		Name: "recordstats_filed_rate",
 		Help: "The number of records processed",
 	})
+	oldestLB = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_oldest_lb",
+		Help: "The number of records processed",
+	})
 )
 
 const (
@@ -72,6 +76,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	}
 	if config.GetFiledTime() == nil {
 		config.FiledTime = make(map[int32]int64)
+	}
+	if config.GetLbLastTime() == nil {
+		config.LbLastTime = make(map[int32]int64)
 	}
 
 	defer func() {
@@ -112,11 +119,25 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 		}
 		rateFiled.Set(rate / 7)
+
+		lax := time.Now().Unix()
+		for _, v := range config.GetLbLastTime() {
+			if v < lax {
+				lax = v
+			}
+		}
+		oldestLB.Set(float64(time.Since(time.Unix(lax, 0)).Seconds()))
 	}()
 
 	rec, err := s.getRecord(ctx, id)
 	if err != nil {
 		return err
+	}
+
+	if rec.Release.GetFolderId() == 673768 {
+		config.LbLastTime[rec.GetRelease().GetInstanceId()] = rec.GetMetadata().GetLastListenTime()
+	} else {
+		delete(config.LbLastTime, rec.GetRelease().GetInstanceId())
 	}
 
 	exist, ok := config.Filed[id]

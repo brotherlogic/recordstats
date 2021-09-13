@@ -20,13 +20,6 @@ func main() {
 	}
 	client := pbrc.NewClientUpdateServiceClient(conn)
 
-	_, err = client.ClientUpdate(ctx2, &pbrc.ClientUpdateRequest{InstanceId: int32(19866960)})
-	if err != nil {
-		log.Fatalf("Bad: %v", err)
-	} else {
-		log.Fatalf("Good: %v", err)
-	}
-
 	conn2, err := utils.LFDialServer(ctx2, "recordcollection")
 	if err != nil {
 		log.Fatalf("Cannot reach rc: %v", err)
