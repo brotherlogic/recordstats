@@ -129,7 +129,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 		}
 		oldestLB.Set(float64(time.Since(time.Unix(lax, 0)).Seconds()))
-		s.Log(fmt.Sprintf("OLDEST_LB %v", id))
+		s.Log(fmt.Sprintf("OLDEST_LB is %v", id))
 	}()
 
 	rec, err := s.getRecord(ctx, id)
