@@ -57,6 +57,10 @@ var (
 		Name: "recordstats_oldest_lb",
 		Help: "The number of records processed",
 	})
+	oldest = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_oldest_lb_actual",
+		Help: "The number of records processed",
+	})
 )
 
 const (
@@ -121,12 +125,15 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		rateFiled.Set(rate / 7)
 
 		lax := time.Now().Unix()
-		for _, v := range config.GetLbLastTime() {
+		id := int32(-1)
+		for iid, v := range config.GetLbLastTime() {
 			if v < lax {
 				lax = v
+				id = iid
 			}
 		}
 		oldestLB.Set(float64(time.Since(time.Unix(lax, 0)).Seconds()))
+		oldest.Set(float64(id))
 	}()
 
 	rec, err := s.getRecord(ctx, id)
