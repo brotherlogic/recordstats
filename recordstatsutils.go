@@ -94,15 +94,11 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				tA++
 				if auditioned.GetLastAudition() > 0 {
 					tAA++
-				} else {
-					s.Log(fmt.Sprintf("SKIPPING %v", auditioned.GetInstanceId()))
 				}
 			}
 		}
 		totalToAuditions.Set(float64(tA))
 		totalAuditions.Set(float64(tAA))
-
-		s.Log(fmt.Sprintf("FILED: %v", config.GetFiled()))
 
 		tF := float64(0)
 		tUF := float64(0)
