@@ -53,12 +53,12 @@ var (
 		Name: "recordstats_filed_rate",
 		Help: "The number of records processed",
 	})
-	oldestLB = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "recordstats_oldest_lb",
+	oldestLBStaged = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_oldest_lb_staged",
 		Help: "The number of records processed",
 	})
-	oldestLBID = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "recordstats_oldest_lb_actual",
+	oldestLBHigh = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_oldest_lb_highschool",
 		Help: "The number of records processed",
 	})
 )
@@ -83,6 +83,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	}
 	if config.GetLbLastTime() == nil {
 		config.LbLastTime = make(map[int32]int64)
+	}
+	if config.GetLbLastTimeHigh() == nil {
+		config.LbLastTimeHigh = make(map[int32]int64)
 	}
 
 	defer func() {
@@ -128,8 +131,19 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				id = iid
 			}
 		}
-		oldestLB.Set(float64(time.Since(time.Unix(lax, 0)).Seconds()))
+		oldestLBStaged.Set(float64(time.Since(time.Unix(lax, 0)).Seconds()))
 		s.Log(fmt.Sprintf("OLDEST_LB is %v", id))
+
+		laxhs := time.Now().Unix()
+		idhs := int32(-1)
+		for iid, v := range config.GetLbLastTimeHigh() {
+			if v < laxhs {
+				laxhs = v
+				idhs = iid
+			}
+		}
+		oldestLBHigh.Set(float64(time.Since(time.Unix(lax, 0)).Seconds()))
+		s.Log(fmt.Sprintf("OLDEST_LB_HIGH is %v", idhs))
 	}()
 
 	rec, err := s.getRecord(ctx, id)
@@ -138,9 +152,16 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	}
 
 	if rec.Release.GetFolderId() == 673768 {
-		config.LbLastTime[rec.GetRelease().GetInstanceId()] = rec.GetMetadata().GetLastListenTime()
+		if rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_STAGED {
+			config.LbLastTime[rec.GetRelease().GetInstanceId()] = rec.GetMetadata().GetLastListenTime()
+			delete(config.LbLastTimeHigh, rec.GetRelease().GetInstanceId())
+		} else {
+			config.LbLastTimeHigh[rec.GetRelease().GetInstanceId()] = rec.GetMetadata().GetLastListenTime()
+			delete(config.LbLastTime, rec.GetRelease().GetInstanceId())
+		}
 	} else {
 		delete(config.LbLastTime, rec.GetRelease().GetInstanceId())
+		delete(config.LbLastTimeHigh, rec.GetRelease().GetInstanceId())
 	}
 
 	exist, ok := config.Filed[id]
