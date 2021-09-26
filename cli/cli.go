@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
 	"time"
 
 	"github.com/brotherlogic/goserver/utils"
@@ -11,7 +10,7 @@ import (
 )
 
 func main() {
-	ctx2, cancel2 := utils.ManualContext("recordcollectioncli-"+os.Args[1], time.Hour)
+	ctx2, cancel2 := utils.ManualContext("recordcollectioncli", time.Hour)
 	defer cancel2()
 
 	conn, err := utils.LFDialServer(ctx2, "recordstats")
