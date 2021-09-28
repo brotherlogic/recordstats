@@ -132,7 +132,6 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 		}
 		oldestLBStaged.Set(float64(time.Since(time.Unix(lax, 0)).Seconds()))
-		s.Log(fmt.Sprintf("THE OLDEST LB is %v", id))
 
 		laxhs := time.Now().Unix()
 		idhs := int32(-1)
@@ -143,7 +142,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 		}
 		oldestLBHigh.Set(float64(time.Since(time.Unix(laxhs, 0)).Seconds()))
-		s.Log(fmt.Sprintf("THE OLDEST LB HIGH is %v", idhs))
+		s.Log(fmt.Sprintf("THE OLDEST LB HIGH is %v but %v", idhs, id))
 	}()
 
 	rec, err := s.getRecord(ctx, id)
