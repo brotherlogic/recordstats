@@ -82,9 +82,11 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		config.FiledTime = make(map[int32]int64)
 	}
 	if config.GetLbLastTime() == nil {
+		s.Log("RESTTING LB")
 		config.LbLastTime = make(map[int32]int64)
 	}
 	if config.GetLbLastTimeHigh() == nil {
+		s.Log("RESETTING LB HIGH")
 		config.LbLastTimeHigh = make(map[int32]int64)
 	}
 
