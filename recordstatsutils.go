@@ -142,7 +142,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				idhs = iid
 			}
 		}
-		oldestLBHigh.Set(float64(time.Since(time.Unix(lax, 0)).Seconds()))
+		oldestLBHigh.Set(float64(time.Since(time.Unix(laxhs, 0)).Seconds()))
 		s.Log(fmt.Sprintf("OLDEST LB HIGH is %v", idhs))
 	}()
 
