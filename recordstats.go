@@ -169,6 +169,7 @@ func main() {
 	cancel()
 
 	oldest.Set(float64(config.LastListenTime))
+	server.update(context.Background(), 1)
 
 	fmt.Printf("%v", server.Serve())
 }
