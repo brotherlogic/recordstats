@@ -162,7 +162,7 @@ func main() {
 	if code.Code() == codes.InvalidArgument {
 		config.LastListenTime = time.Now().Unix()
 		err := server.KSclient.Save(ctx, CONFIG, config)
-		server.Log(fmt.Sprintf("Written new config: %v", err))
+		server.Log(fmt.Sprintf("written new config: %v", err))
 	} else {
 		config = data.(*pb.Config)
 	}
