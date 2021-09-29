@@ -156,8 +156,11 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		if rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_STAGED {
 			config.LbLastTime[rec.GetRelease().GetInstanceId()] = rec.GetMetadata().GetLastListenTime()
 			delete(config.LbLastTimeHigh, rec.GetRelease().GetInstanceId())
-		} else {
+		} else if rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_HIGH_SCHOOL {
 			config.LbLastTimeHigh[rec.GetRelease().GetInstanceId()] = rec.GetMetadata().GetLastListenTime()
+			delete(config.LbLastTime, rec.GetRelease().GetInstanceId())
+		} else {
+			delete(config.LbLastTimeHigh, rec.GetRelease().GetInstanceId())
 			delete(config.LbLastTime, rec.GetRelease().GetInstanceId())
 		}
 	} else {
