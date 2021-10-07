@@ -93,6 +93,10 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		s.Log("RESETTING LB HIGH")
 		config.LbLastTimeHigh = make(map[int32]int64)
 	}
+	if config.GetLastListen() == nil {
+		s.Log("RESETTING LB HIGH")
+		config.LastListen = make(map[int32]int64)
+	}
 
 	defer func() {
 		tA := 0
