@@ -179,7 +179,8 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		return err
 	}
 
-	if rec.Metadata.GetCategory() != rcpb.ReleaseMetadata_SOLD_ARCHIVE {
+	if rec.Metadata.GetCategory() != rcpb.ReleaseMetadata_SOLD_ARCHIVE &&
+		rec.Metadata.GetCategory() != rcpb.ReleaseMetadata_PARENTS {
 		config.LastListen[rec.GetRelease().GetInstanceId()] = rec.GetMetadata().GetLastListenTime()
 	} else {
 		delete(config.LastListen, rec.GetRelease().GetInstanceId())
