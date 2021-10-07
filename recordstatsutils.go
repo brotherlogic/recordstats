@@ -146,7 +146,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		ll := time.Now().Unix()
 		idll := int32(-1)
 		for iid, v := range config.GetLastListen() {
-			if v < ll {
+			if v < ll && v > 0 {
 				ll = v
 				idll = iid
 			}
