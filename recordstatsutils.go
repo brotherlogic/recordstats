@@ -65,6 +65,10 @@ var (
 		Name: "recordstats_last_listen",
 		Help: "The number of records processed",
 	})
+	unlistened = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_unlistened",
+		Help: "The number of records processed",
+	})
 )
 
 const (
@@ -145,13 +149,18 @@ func (s *Server) update(ctx context.Context, id int32) error {
 
 		ll := time.Now().Unix()
 		idll := int32(-1)
+		unlisten := float64(0)
 		for iid, v := range config.GetLastListen() {
 			if v < ll && v > 0 {
 				ll = v
 				idll = iid
 			}
+			if v == 0 {
+				unlisten++
+			}
 		}
 		lastListen.Set(float64(time.Since(time.Unix(ll, 0)).Seconds()))
+		unlistened.Set(unlisten)
 
 		laxhs := time.Now().Unix()
 		idhs := int32(-1)
