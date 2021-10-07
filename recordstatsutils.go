@@ -61,6 +61,10 @@ var (
 		Name: "recordstats_oldest_lb_highschool",
 		Help: "The number of records processed",
 	})
+	lastListen = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_last_listen",
+		Help: "The number of records processed",
+	})
 )
 
 const (
@@ -135,6 +139,16 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		}
 		oldestLBStaged.Set(float64(time.Since(time.Unix(lax, 0)).Seconds()))
 
+		ll := time.Now().Unix()
+		idll := int32(-1)
+		for iid, v := range config.GetLastListen() {
+			if v < ll {
+				ll = v
+				idll = iid
+			}
+		}
+		lastListen.Set(float64(time.Since(time.Unix(ll, 0)).Seconds()))
+
 		laxhs := time.Now().Unix()
 		idhs := int32(-1)
 		for iid, v := range config.GetLbLastTimeHigh() {
@@ -144,12 +158,18 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 		}
 		oldestLBHigh.Set(float64(time.Since(time.Unix(laxhs, 0)).Seconds()))
-		s.Log(fmt.Sprintf("THE OLDEST LB HIGH is %v (%v) but %v (%v)", idhs, laxhs, id, lax))
+		s.Log(fmt.Sprintf("THE OLDEST LB HIGH is %v (%v) but %v (%v) AND (%v), (%v)", idhs, laxhs, id, lax, ll, idll))
 	}()
 
 	rec, err := s.getRecord(ctx, id)
 	if err != nil {
 		return err
+	}
+
+	if rec.Metadata.GetCategory() != rcpb.ReleaseMetadata_SOLD_ARCHIVE {
+		config.LastListen[rec.GetRelease().GetInstanceId()] = rec.GetMetadata().GetLastListenTime()
+	} else {
+		delete(config.LastListen, rec.GetRelease().GetInstanceId())
 	}
 
 	if rec.Release.GetFolderId() == 673768 {

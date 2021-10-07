@@ -14,6 +14,7 @@ message Config {
   map<int32, int64> filed_time = 5;
   map<int32, int64> lb_last_time = 6;
   map<int32, int64> lb_last_time_high = 7;
+  map<int32, int64> last_listen = 8;
 }
 
 message Auditioned {
