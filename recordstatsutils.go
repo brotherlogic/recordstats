@@ -7,6 +7,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/net/context"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	rcpb "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordstats/proto"
@@ -176,6 +178,12 @@ func (s *Server) update(ctx context.Context, id int32) error {
 
 	rec, err := s.getRecord(ctx, id)
 	if err != nil {
+		if status.Convert(err).Code() == codes.OutOfRange {
+			delete(config.LastListen, id)
+			delete(config.LbLastTimeHigh, id)
+			delete(config.LbLastTime, id)
+			return s.KSclient.Save(ctx, CONFIG, config)
+		}
 		return err
 	}
 
