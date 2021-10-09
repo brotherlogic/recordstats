@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -65,6 +66,10 @@ var (
 	})
 	lastListen = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_last_listen",
+		Help: "The number of records processed",
+	})
+	medianListen = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_median_listen",
 		Help: "The number of records processed",
 	})
 	unlistened = promauto.NewGauge(prometheus.GaugeOpts{
@@ -152,6 +157,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		ll := time.Now().Unix()
 		idll := int32(-1)
 		unlisten := float64(0)
+		listens := make([]int, 0)
 		for iid, v := range config.GetLastListen() {
 			if v < ll && v > 0 {
 				ll = v
@@ -159,8 +165,13 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 			if v == 0 {
 				unlisten++
+			} else {
+				listens = append(listens, int(v))
 			}
 		}
+		sort.Ints(listens)
+		medianListen.Set(float64(listens[len(listens)/2]))
+
 		lastListen.Set(float64(time.Since(time.Unix(ll, 0)).Seconds()))
 		unlistened.Set(unlisten)
 
