@@ -205,7 +205,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		delete(config.LastListen, rec.GetRelease().GetInstanceId())
 	}
 
-	if rec.Release.GetFolderId() == 673768 {
+	if rec.Release.GetFolderId() == 673768 || rec.Release.GetFolderId() == 3578980 {
 		if rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_STAGED {
 			config.LbLastTime[rec.GetRelease().GetInstanceId()] = rec.GetMetadata().GetLastListenTime()
 			delete(config.LbLastTimeHigh, rec.GetRelease().GetInstanceId())
