@@ -10,8 +10,6 @@ import (
 	"github.com/brotherlogic/goserver"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	pbg "github.com/brotherlogic/goserver/proto"
 	"github.com/brotherlogic/goserver/utils"
@@ -147,28 +145,17 @@ func main() {
 		return
 	}
 
-	ctx, cancel := utils.ManualContext("recordbudget-startup", "recordbudget-startup", time.Minute, true)
+	ctx, cancel := utils.ManualContext("recordstats-startup", time.Minute)
 	data, _, err := server.KSclient.Read(ctx, CONFIG, &pb.Config{})
-	code := status.Convert(err)
+
+	if err != nil {
+		return
+	}
+
 	config := &pb.Config{}
-	if code.Code() != codes.InvalidArgument && code.Code() != codes.OK {
-
-		//Silent crash - if we can't reach keystore, or it's not found
-		if code.Code() == codes.DeadlineExceeded || code.Code() == codes.NotFound {
-			return
-		}
-		log.Fatalf("Unable to load config: %v", err)
-	}
-	if code.Code() == codes.InvalidArgument {
-		config.LastListenTime = time.Now().Unix()
-		err := server.KSclient.Save(ctx, CONFIG, config)
-		server.Log(fmt.Sprintf("Written new config: %v", err))
-	} else {
-		config = data.(*pb.Config)
-	}
-	cancel()
-
+	config = data.(*pb.Config)
 	oldest.Set(float64(config.LastListenTime))
+	cancel()
 
 	fmt.Printf("%v", server.Serve())
 }
