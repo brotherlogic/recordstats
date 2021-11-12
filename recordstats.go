@@ -157,5 +157,9 @@ func main() {
 	oldest.Set(float64(config.LastListenTime))
 	cancel()
 
+	ctx2, cancel2 := utils.ManualContext("recordbudget-trigger", time.Minute)
+	server.update(ctx2, 1)
+	cancel2()
+
 	fmt.Printf("%v", server.Serve())
 }

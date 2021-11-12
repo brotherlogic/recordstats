@@ -4,9 +4,23 @@ package recordstats;
 
 option go_package = "github.com/brotherlogic/recordstats/proto";
 
+import "github.com/brotherlogic/recordcollection/proto/recordcollection.proto";
+
 message Config {
   int64 last_listen_time = 1;
   repeated CompleteSale complete_sales = 2;
+  repeated Auditioned auditions = 3;
+  map<int32, recordcollection.ReleaseMetadata.FileSize> filed = 4;
+  map<int32, int64> filed_time = 5;
+  map<int32, int64> lb_last_time = 6;
+  map<int32, int64> lb_last_time_high = 7;
+  map<int32, int64> last_listen = 8;
+}
+
+message Auditioned {
+  int32 instance_id = 1;
+  bool valid = 2;
+  int64 last_audition = 3;
 }
 
 message CompleteSale {

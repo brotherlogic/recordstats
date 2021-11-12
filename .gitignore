@@ -4,3 +4,4 @@ recordstats
 
 testing
 *.backup
+cli/cli
