@@ -27,3 +27,11 @@ message CompleteSale {
   int32 instance_id = 1;
   bool has_cost = 2;
 }
+
+message GetStatsRequest {
+  int32 instance_id = 1;
+}
+
+service RecordStatsService {
+  rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {};
+}
