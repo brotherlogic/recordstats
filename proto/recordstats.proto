@@ -21,6 +21,7 @@ message Auditioned {
   int32 instance_id = 1;
   bool valid = 2;
   int64 last_audition = 3;
+  int32 audScore = 4;
 }
 
 message CompleteSale {
@@ -30,6 +31,11 @@ message CompleteSale {
 
 message GetStatsRequest {
   int32 instance_id = 1;
+}
+
+
+message GetStatsResponse {
+
 }
 
 service RecordStatsService {

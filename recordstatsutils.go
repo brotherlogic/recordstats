@@ -48,6 +48,10 @@ var (
 		Name: "recordstats_auditioned_week",
 		Help: "Number of auditions this week",
 	})
+	scoreAuditioned = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "recordstats_auditioned_scores",
+		Help: "All the auditioned scores",
+	}, []string{"score"})
 	totalUnfilled = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_unfiled",
 		Help: "The number of records processed",
@@ -118,7 +122,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		tAA := 0
 
 		wCount := 0
+		sa := make(map[int32]int32)
 		for _, auditioned := range config.GetAuditions() {
+			sa[auditioned.GetAudScore()]++
 			if auditioned.GetValid() {
 				tA++
 				if auditioned.GetLastAudition() > 0 {
@@ -132,6 +138,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		weekAuditioned.Set(float64(wCount))
 		totalToAuditions.Set(float64(tA))
 		totalAuditions.Set(float64(tAA))
+		for key, val := range sa {
+			scoreAuditioned.With(prometheus.Labels{"score": fmt.Sprintf("%v", key)}).Set(float64(val))
+		}
 
 		tF := float64(0)
 		tUF := float64(0)
@@ -247,6 +256,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			if aud.GetInstanceId() == id {
 				aud.Valid = rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_IN_COLLECTION
 				aud.LastAudition = rec.GetMetadata().GetLastAudition()
+				aud.AudScore = rec.GetMetadata().GetAuditionScore()
 				found = true
 				break
 			}
@@ -256,6 +266,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			config.Auditions = append(config.Auditions, &pb.Auditioned{
 				Valid:        rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_IN_COLLECTION,
 				LastAudition: rec.GetMetadata().GetLastAudition(),
+				AudScore:     rec.GetMetadata().GetAuditionScore(),
 			})
 		}
 
