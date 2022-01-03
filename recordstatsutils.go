@@ -124,7 +124,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		wCount := 0
 		sa := make(map[int32]int32)
 		for _, auditioned := range config.GetAuditions() {
-			sa[auditioned.GetAudScore()]++
+			if auditioned.GetAudScore() > 0 {
+				sa[auditioned.GetAudScore()]++
+			}
 			if auditioned.GetValid() {
 				tA++
 				if auditioned.GetLastAudition() > 0 {
