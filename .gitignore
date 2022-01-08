@@ -5,4 +5,4 @@ recordstats
 testing
 *.backup
 cli/cli
- recordstats_cli/recordstats_cli
+recordstats_cli/recordstats_cli
