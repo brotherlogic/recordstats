@@ -87,11 +87,11 @@ var (
 	tValue = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "recordstats_total_value",
 		Help: "The number of records processed",
-	}, []string{"category", "filled"})
+	}, []string{"category", "filed"})
 	aValue = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "recordstats_average_value",
 		Help: "The number of records processed",
-	}, []string{"category", "filled"})
+	}, []string{"category", "filed"})
 )
 
 const (
