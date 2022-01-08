@@ -84,6 +84,14 @@ var (
 		Name: "recordstats_unlistened",
 		Help: "The number of records processed",
 	})
+	tValue = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "recordstats_total_value",
+		Help: "The number of records processed",
+	}, []string{"category", "filled"})
+	aValue = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "recordstats_average_value",
+		Help: "The number of records processed",
+	}, []string{"category", "filled"})
 )
 
 const (
@@ -118,6 +126,16 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	}
 
 	defer func() {
+		for _, value := range config.GetValues() {
+			tl := float32(0)
+			for _, v := range value.GetValue() {
+				tl += v
+			}
+
+			tValue.With(prometheus.Labels{"category": value.GetCategory(), "filed": value.GetFilling()}).Set(float64(tl))
+			aValue.With(prometheus.Labels{"category": value.GetCategory(), "filed": value.GetFilling()}).Set(float64(tl / float32(len(config.GetValues()))))
+		}
+
 		tA := 0
 		tAA := 0
 
@@ -217,6 +235,25 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				return s.KSclient.Save(ctx, CONFIG, config)
 			}
 			return err
+		}
+
+		vfound := false
+		for _, value := range config.GetValues() {
+			if rec.Metadata.GetCategory().String() == value.GetCategory() && rec.Metadata.GetFiledUnder().String() == value.GetFilling() {
+				vfound = true
+				value.Value[rec.GetRelease().GetInstanceId()] = float32(rec.GetMetadata().GetSalePrice())
+			} else {
+				delete(value.GetValue(), rec.GetRelease().GetInstanceId())
+			}
+		}
+		if !vfound {
+			val := &pb.Values{
+				Category: rec.GetMetadata().GetCategory().String(),
+				Filling:  rec.GetMetadata().GetFiledUnder().String(),
+				Value:    make(map[int32]float32),
+			}
+			val.Value[rec.Release.GetInstanceId()] = float32(rec.GetMetadata().GetSalePrice())
+			config.Values = append(config.Values, val)
 		}
 
 		if rec.Metadata.GetCategory() != rcpb.ReleaseMetadata_SOLD_ARCHIVE &&

@@ -15,6 +15,13 @@ message Config {
   map<int32, int64> lb_last_time = 6;
   map<int32, int64> lb_last_time_high = 7;
   map<int32, int64> last_listen = 8;
+  repeated Values values = 9;
+}
+
+message Values {
+  string category = 1;
+  string filling = 2;
+  map<int32,float> value = 3;
 }
 
 message Auditioned {
