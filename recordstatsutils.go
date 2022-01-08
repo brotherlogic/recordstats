@@ -241,7 +241,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		for _, value := range config.GetValues() {
 			if rec.Metadata.GetCategory().String() == value.GetCategory() && rec.Metadata.GetFiledUnder().String() == value.GetFilling() {
 				vfound = true
-				value.Value[rec.GetRelease().GetInstanceId()] = float32(rec.GetMetadata().GetSalePrice())
+				value.Value[rec.GetRelease().GetInstanceId()] = float32(rec.GetMetadata().GetCurrentSalePrice())
 			} else {
 				delete(value.GetValue(), rec.GetRelease().GetInstanceId())
 			}
@@ -252,7 +252,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				Filling:  rec.GetMetadata().GetFiledUnder().String(),
 				Value:    make(map[int32]float32),
 			}
-			val.Value[rec.Release.GetInstanceId()] = float32(rec.GetMetadata().GetSalePrice())
+			val.Value[rec.Release.GetInstanceId()] = float32(rec.GetMetadata().GetCurrentSalePrice())
 			config.Values = append(config.Values, val)
 		}
 
