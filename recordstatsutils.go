@@ -133,7 +133,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 
 			tValue.With(prometheus.Labels{"category": value.GetCategory(), "filed": value.GetFilling()}).Set(float64(tl))
-			aValue.With(prometheus.Labels{"category": value.GetCategory(), "filed": value.GetFilling()}).Set(float64(tl / float32(len(config.GetValues()))))
+			aValue.With(prometheus.Labels{"category": value.GetCategory(), "filed": value.GetFilling()}).Set(float64(tl / float32(len(value.GetValue()))))
 		}
 
 		tA := 0
