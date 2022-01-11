@@ -164,18 +164,6 @@ func main() {
 		return
 	}
 
-	ctx, cancel := utils.ManualContext("recordstats-startup", time.Minute)
-	data, _, err := server.KSclient.Read(ctx, CONFIG, &pb.Config{})
-
-	if err != nil {
-		return
-	}
-
-	config := &pb.Config{}
-	config = data.(*pb.Config)
-	oldest.Set(float64(config.LastListenTime))
-	cancel()
-
 	ctx2, cancel2 := utils.ManualContext("recordbudget-trigger", time.Minute)
 	server.update(ctx2, 1)
 	cancel2()

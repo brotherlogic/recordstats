@@ -310,6 +310,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				Valid:        rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_IN_COLLECTION,
 				LastAudition: rec.GetMetadata().GetLastAudition(),
 				AudScore:     rec.GetMetadata().GetAuditionScore(),
+				InstanceId:   rec.GetRelease().GetInstanceId(),
 			})
 		}
 
