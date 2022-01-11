@@ -105,6 +105,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		return err
 	}
 	config := data.(*pb.Config)
+	cleanAuditions(config)
 
 	if config.GetFiled() == nil {
 		config.Filed = make(map[int32]rcpb.ReleaseMetadata_FileSize)

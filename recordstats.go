@@ -24,6 +24,25 @@ type Server struct {
 	Testing bool
 }
 
+func cleanAuditions(config *pb.Config) {
+	mapper := make(map[int32]*pb.Auditioned)
+	for _, aud := range config.Auditions {
+		if val, ok := mapper[aud.GetInstanceId()]; ok {
+			if aud.GetLastAudition() > val.GetLastAudition() {
+				mapper[aud.GetInstanceId()] = aud
+			}
+		} else {
+			mapper[aud.GetInstanceId()] = aud
+		}
+	}
+
+	var auds []*pb.Auditioned
+	for _, aud := range mapper {
+		auds = append(auds, aud)
+	}
+	config.Auditions = auds
+}
+
 // Init builds the server
 func Init() *Server {
 	s := &Server{
