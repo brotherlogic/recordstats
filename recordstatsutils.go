@@ -297,7 +297,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		found := false
 		for _, aud := range config.GetAuditions() {
 			if aud.GetInstanceId() == id {
-				aud.Valid = rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_IN_COLLECTION
+				aud.Valid = rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_IN_COLLECTION &&
+					(rec.GetMetadata().GetBoxState() == rcpb.ReleaseMetadata_BOX_UNKNOWN ||
+						rec.GetMetadata().GetBoxState() != rcpb.ReleaseMetadata_OUT_OF_BOX)
 				aud.LastAudition = rec.GetMetadata().GetLastAudition()
 				aud.AudScore = rec.GetMetadata().GetAuditionScore()
 				found = true
@@ -307,7 +309,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 
 		if !found {
 			config.Auditions = append(config.Auditions, &pb.Auditioned{
-				Valid:        rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_IN_COLLECTION,
+				Valid: rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_IN_COLLECTION &&
+					(rec.GetMetadata().GetBoxState() == rcpb.ReleaseMetadata_BOX_UNKNOWN ||
+						rec.GetMetadata().GetBoxState() != rcpb.ReleaseMetadata_OUT_OF_BOX),
 				LastAudition: rec.GetMetadata().GetLastAudition(),
 				AudScore:     rec.GetMetadata().GetAuditionScore(),
 				InstanceId:   rec.GetRelease().GetInstanceId(),
