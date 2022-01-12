@@ -300,7 +300,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			if aud.GetInstanceId() == id {
 				aud.Valid = rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_IN_COLLECTION &&
 					(rec.GetMetadata().GetBoxState() == rcpb.ReleaseMetadata_BOX_UNKNOWN ||
-						rec.GetMetadata().GetBoxState() != rcpb.ReleaseMetadata_OUT_OF_BOX)
+						rec.GetMetadata().GetBoxState() == rcpb.ReleaseMetadata_OUT_OF_BOX)
 				aud.LastAudition = rec.GetMetadata().GetLastAudition()
 				aud.AudScore = rec.GetMetadata().GetAuditionScore()
 				found = true

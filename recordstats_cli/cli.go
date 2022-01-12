@@ -28,7 +28,7 @@ func main() {
 	registry := pbrc.NewRecordCollectionServiceClient(conn2)
 	ids, err := registry.QueryRecords(ctx2, &pbrc.QueryRecordsRequest{Query: &pbrc.QueryRecordsRequest_UpdateTime{int64(0)}})
 	if err != nil {
-		log.Fatalf("Bad query: %v", err)
+		log.Fatalf("Bad query: %v, %v", err, ids)
 	}
 
 	for i, id := range ids.GetInstanceIds() {
