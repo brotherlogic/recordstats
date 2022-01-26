@@ -76,6 +76,12 @@ var (
 		Name: "recordstats_last_listen",
 		Help: "The number of records processed",
 	})
+	listenRate = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_listen_rate",
+	})
+	listenTotal = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_days_to_listen",
+	})
 	medianListen = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_median_listen",
 		Help: "The number of records processed",
@@ -198,7 +204,11 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		idll := int32(-1)
 		unlisten := float64(0)
 		listens := make([]int, 0)
+		last14 := float64(0)
 		for iid, v := range config.GetLastListen() {
+			if time.Since(time.Unix(v, 0)) < time.Hour*24*14 {
+				last14++
+			}
 			if v < ll && v > 0 {
 				ll = v
 				idll = iid
@@ -214,6 +224,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 
 		lastListen.Set(float64(time.Since(time.Unix(ll, 0)).Seconds()))
 		unlistened.Set(unlisten)
+
+		listenRate.Set(float64(last14 / 14))
+		listenTotal.Set(float64(len(config.GetLastListen())) / (last14 / 14))
 
 		laxhs := time.Now().Unix()
 		idhs := int32(-1)
@@ -312,7 +325,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			config.Auditions = append(config.Auditions, &pb.Auditioned{
 				Valid: rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_IN_COLLECTION &&
 					(rec.GetMetadata().GetBoxState() == rcpb.ReleaseMetadata_BOX_UNKNOWN ||
-						rec.GetMetadata().GetBoxState() != rcpb.ReleaseMetadata_OUT_OF_BOX),
+						rec.GetMetadata().GetBoxState() == rcpb.ReleaseMetadata_OUT_OF_BOX),
 				LastAudition: rec.GetMetadata().GetLastAudition(),
 				AudScore:     rec.GetMetadata().GetAuditionScore(),
 				InstanceId:   rec.GetRelease().GetInstanceId(),
