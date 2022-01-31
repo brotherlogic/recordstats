@@ -79,6 +79,9 @@ var (
 	listenRate = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_listen_rate",
 	})
+	listenTodayRate = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_listen_today_rate",
+	})
 	listenTotal = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_days_to_listen",
 	})
@@ -204,9 +207,13 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		unlisten := float64(0)
 		listens := make([]int, 0)
 		last14 := float64(0)
+		today := float64(0)
 		for iid, v := range config.GetLastListen() {
 			if time.Since(time.Unix(v, 0)) < time.Hour*24*14 {
 				last14++
+			}
+			if time.Since(time.Unix(v, 0)) < time.Hour*24 {
+				today++
 			}
 			if v < ll && v > 0 {
 				ll = v
@@ -224,6 +231,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		lastListen.Set(float64(ll))
 		unlistened.Set(unlisten)
 
+		listenTodayRate.Set(float64(today))
 		listenRate.Set(float64(last14 / 14))
 		listenTotal.Set(float64(len(config.GetLastListen())) / (last14 / 14))
 
