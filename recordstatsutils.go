@@ -219,9 +219,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 		}
 		sort.Ints(listens)
-		medianListen.Set(float64(time.Since(time.Unix(int64(listens[len(listens)/2]), 0)).Seconds()))
+		medianListen.Set(float64(listens[len(listens)/2]))
 
-		lastListen.Set(float64(time.Since(time.Unix(ll, 0)).Seconds()))
+		lastListen.Set(float64(ll))
 		unlistened.Set(unlisten)
 
 		listenRate.Set(float64(last14 / 14))
