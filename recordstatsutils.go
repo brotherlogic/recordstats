@@ -153,7 +153,6 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				sa[auditioned.GetAudScore()]++
 			}
 			if auditioned.GetValid() {
-				s.Log(fmt.Sprintf("%v is valid", auditioned))
 				tA++
 				if auditioned.GetLastAudition() > 0 {
 					tAA++
