@@ -213,6 +213,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				last14++
 			}
 			if time.Since(time.Unix(v, 0)) < time.Hour*24 {
+				s.CtxLog(ctx, fmt.Sprintf("FOUND TODAY: %v", iid))
 				today++
 			}
 			if v < ll && v > 0 {
