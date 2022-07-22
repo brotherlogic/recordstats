@@ -105,7 +105,7 @@ var (
 
 	keeps = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "recordstats_keepers",
-		Help: "The number of records processed",
+		Help: "The number of records kept",
 	}, []string{"folder"})
 )
 
