@@ -97,10 +97,16 @@ var (
 		Name: "recordstats_total_value",
 		Help: "The number of records processed",
 	}, []string{"category", "filed"})
+
 	aValue = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "recordstats_average_value",
 		Help: "The number of records processed",
 	}, []string{"category", "filed"})
+
+	keeps = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "recordstats_keepers",
+		Help: "The number of records processed",
+	}, []string{"folder"})
 )
 
 const (
@@ -134,8 +140,24 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		s.Log("RESETTING LB HIGH")
 		config.LastListen = make(map[int32]int64)
 	}
+	if config.GetKeeps() == nil {
+		config.Keeps = make(map[int32]rcpb.ReleaseMetadata_KeepState)
+	}
+	if config.GetFolder() == nil {
+		config.Folder = make(map[int32]int32)
+	}
 
 	defer func() {
+		keepCount := make(map[int32]float64)
+		for key, value := range config.GetKeeps() {
+			if value == rcpb.ReleaseMetadata_KEEPER {
+				keepCount[config.GetFolder()[key]]++
+			}
+		}
+		for folder, count := range keepCount {
+			keeps.With(prometheus.Labels{"folder": fmt.Sprintf("%v", folder)}).Set(count)
+		}
+
 		for _, value := range config.GetValues() {
 			tl := float32(0)
 			for _, v := range value.GetValue() {
@@ -227,7 +249,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 		}
 		sort.Ints(listens)
-		medianListen.Set(float64(listens[len(listens)/2]))
+		if len(listens) > 0 {
+			medianListen.Set(float64(listens[len(listens)/2]))
+		}
 
 		lastListen.Set(float64(ll))
 		unlistened.Set(unlisten)
@@ -259,6 +283,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 			return err
 		}
+
+		config.Folder[id] = rec.GetRelease().GetFolderId()
+		config.Keeps[id] = rec.GetMetadata().GetKeep()
 
 		vfound := false
 		for _, value := range config.GetValues() {
