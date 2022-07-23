@@ -107,6 +107,10 @@ var (
 		Name: "recordstats_keepers",
 		Help: "The number of records kept",
 	}, []string{"folder"})
+	categories = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "recordstats_categories",
+		Help: "The number of records kept",
+	}, []string{"category"})
 )
 
 const (
@@ -156,6 +160,14 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		}
 		for folder, count := range keepCount {
 			keeps.With(prometheus.Labels{"folder": fmt.Sprintf("%v", folder)}).Set(count)
+		}
+
+		catCount := make(map[string]float64)
+		for _, value := range config.GetCategories() {
+			catCount[value.Enum().String()]++
+		}
+		for category, count := range catCount {
+			categories.With(prometheus.Labels{"category": category}).Set(count)
 		}
 
 		for _, value := range config.GetValues() {
