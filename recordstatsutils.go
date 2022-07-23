@@ -150,6 +150,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	if config.GetFolder() == nil {
 		config.Folder = make(map[int32]int32)
 	}
+	if config.GetCategories() == nil {
+		config.Categories = make(map[int32]rcpb.ReleaseMetadata_Category)
+	}
 
 	defer func() {
 		keepCount := make(map[int32]float64)
