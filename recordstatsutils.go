@@ -298,6 +298,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 
 		config.Folder[id] = rec.GetRelease().GetFolderId()
 		config.Keeps[id] = rec.GetMetadata().GetKeep()
+		config.Categories[id] = rec.GetMetadata().GetCategory()
 
 		vfound := false
 		for _, value := range config.GetValues() {
