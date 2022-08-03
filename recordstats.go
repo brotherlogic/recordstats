@@ -46,8 +46,8 @@ func cleanAuditions(config *pb.Config) {
 func Init() *Server {
 	s := &Server{
 		GoServer: &goserver.GoServer{},
-		rcclient: &rcc.RecordCollectionClient{},
 	}
+	s.rcclient = &rcc.RecordCollectionClient{Gs: s.GoServer}
 	return s
 }
 
