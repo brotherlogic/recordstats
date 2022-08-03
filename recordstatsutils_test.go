@@ -4,13 +4,15 @@ import (
 	"context"
 	"testing"
 
-	"github.com/brotherlogic/keystore/client"
+	keystoreclient "github.com/brotherlogic/keystore/client"
+	rcc "github.com/brotherlogic/recordcollection/client"
 
 	pb "github.com/brotherlogic/recordstats/proto"
 )
 
 func InitTest() *Server {
 	s := Init()
+	s.rcclient = &rcc.RecordCollectionClient{Test: true}
 	s.SkipLog = true
 	s.Testing = true
 	s.GoServer.KSclient = *keystoreclient.GetTestClient(".test")
