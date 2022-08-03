@@ -19,6 +19,7 @@ message Config {
   map<int32, recordcollection.ReleaseMetadata.KeepState> keeps = 10;
   repeated Values values = 9;
   map<int32, recordcollection.ReleaseMetadata.Category> categories = 12;
+  map<int32, int32> weights = 13;
 }
 
 message Values {

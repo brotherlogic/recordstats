@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/brotherlogic/keystore/client"
+	keystoreclient "github.com/brotherlogic/keystore/client"
 
 	pb "github.com/brotherlogic/recordstats/proto"
 )
