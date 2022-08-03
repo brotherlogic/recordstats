@@ -1,10 +1,7 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"time"
 
 	"github.com/brotherlogic/goserver"
@@ -139,14 +136,6 @@ func (s *Server) getRecord(ctx context.Context, iid int32) (*rcpb.Record, error)
 }
 
 func main() {
-	var quiet = flag.Bool("quiet", false, "Show all output")
-	flag.Parse()
-
-	//Turn off logging
-	if *quiet {
-		log.SetFlags(0)
-		log.SetOutput(ioutil.Discard)
-	}
 	server := Init()
 	server.PrepServer("recordstats")
 	server.Register = server
