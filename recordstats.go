@@ -13,6 +13,7 @@ import (
 
 	pbg "github.com/brotherlogic/goserver/proto"
 	"github.com/brotherlogic/goserver/utils"
+	rcc "github.com/brotherlogic/recordcollection/client"
 	rcpb "github.com/brotherlogic/recordcollection/proto"
 	ropb "github.com/brotherlogic/recordsorganiser/proto"
 	pb "github.com/brotherlogic/recordstats/proto"
@@ -21,7 +22,8 @@ import (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	Testing bool
+	rcclient *rcc.RecordCollectionClient
+	Testing  bool
 }
 
 func cleanAuditions(config *pb.Config) {
@@ -47,6 +49,7 @@ func cleanAuditions(config *pb.Config) {
 func Init() *Server {
 	s := &Server{
 		GoServer: &goserver.GoServer{},
+		rcclient: &rcc.RecordCollectionClient{},
 	}
 	return s
 }
@@ -131,19 +134,11 @@ func (s *Server) getRecord(ctx context.Context, iid int32) (*rcpb.Record, error)
 	if s.Testing {
 		return &rcpb.Record{Metadata: &rcpb.ReleaseMetadata{}}, nil
 	}
-	conn, err := s.FDialServer(ctx, "recordcollection")
+	res, err := s.rcclient.GetRecord(ctx, &rcpb.GetRecordRequest{InstanceId: iid})
 	if err != nil {
 		return nil, err
 	}
-	defer conn.Close()
-
-	client := rcpb.NewRecordCollectionServiceClient(conn)
-	res, err := client.GetRecord(ctx, &rcpb.GetRecordRequest{InstanceId: iid})
-	if err != nil {
-		return nil, err
-	}
-
-	return res.GetRecord(), nil
+	return res.GetRecord(), err
 }
 
 func main() {
@@ -156,10 +151,10 @@ func main() {
 		log.SetOutput(ioutil.Discard)
 	}
 	server := Init()
-	server.PrepServer()
+	server.PrepServer("recordstats")
 	server.Register = server
 
-	err := server.RegisterServerV2("recordstats", false, true)
+	err := server.RegisterServerV2(false)
 	if err != nil {
 		return
 	}
