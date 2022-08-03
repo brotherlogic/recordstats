@@ -31,7 +31,10 @@ func TestBasic(t *testing.T) {
 func TestTrackWeight(t *testing.T) {
 	s := InitTest()
 
-	s.rcclient.AddRecord(&rcpb.Record{Release: &gdpb.Release{InstanceId: 12345}, Metadata: &rcpb.ReleaseMetadata{WeightInGrams: 300}})
+	s.rcclient.AddRecord(
+		&rcpb.Record{
+			Release:  &gdpb.Release{InstanceId: 12345},
+			Metadata: &rcpb.ReleaseMetadata{WeightInGrams: 300}})
 
 	s.ClientUpdate(context.Background(), &rcpb.ClientUpdateRequest{InstanceId: 12345})
 
@@ -45,7 +48,7 @@ func TestTrackWeight(t *testing.T) {
 		t.Errorf("Could not locate weight: %v", config)
 	} else {
 		if val != 300 {
-			t.Errorf("Bad weight: %v", val)
+			t.Errorf("Bad weight: %v from %v", val, config)
 		}
 	}
 }

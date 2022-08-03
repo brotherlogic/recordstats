@@ -111,6 +111,10 @@ var (
 		Name: "recordstats_categories",
 		Help: "The number of records kept",
 	}, []string{"category"})
+	withWeight = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "recordstats_weights",
+		Help: "Records that have weights",
+	}, []string{"category"})
 )
 
 const (
@@ -153,8 +157,21 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	if config.GetCategories() == nil {
 		config.Categories = make(map[int32]rcpb.ReleaseMetadata_Category)
 	}
+	if config.GetWeights() == nil {
+		config.Weights = make(map[int32]int32)
+	}
 
 	defer func() {
+		weightCount := make(map[string]float64)
+		for id, weight := range config.GetWeights() {
+			if weight > 0 {
+				weightCount[config.GetCategories()[id].String()]++
+			}
+		}
+		for cat, count := range weightCount {
+			withWeight.With(prometheus.Labels{"category": cat}).Set(count)
+		}
+
 		keepCount := make(map[int32]float64)
 		for key, value := range config.GetKeeps() {
 			if value == rcpb.ReleaseMetadata_KEEPER {
@@ -299,6 +316,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			return err
 		}
 
+		config.Weights[id] = rec.GetMetadata().GetWeightInGrams()
 		config.Folder[id] = rec.GetRelease().GetFolderId()
 		config.Keeps[id] = rec.GetMetadata().GetKeep()
 		config.Categories[id] = rec.GetMetadata().GetCategory()

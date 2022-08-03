@@ -131,9 +131,6 @@ func (s *Server) getPhysicalFolders(ctx context.Context) ([]int32, error) {
 }
 
 func (s *Server) getRecord(ctx context.Context, iid int32) (*rcpb.Record, error) {
-	if s.Testing {
-		return &rcpb.Record{Metadata: &rcpb.ReleaseMetadata{}}, nil
-	}
 	res, err := s.rcclient.GetRecord(ctx, &rcpb.GetRecordRequest{InstanceId: iid})
 	if err != nil {
 		return nil, err
