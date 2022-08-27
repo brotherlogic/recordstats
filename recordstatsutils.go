@@ -85,6 +85,9 @@ var (
 	listenTotal = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_days_to_listen",
 	})
+	cwidths = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_cwidths",
+	})
 	medianListen = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_median_listen",
 		Help: "The number of records processed",
@@ -160,8 +163,18 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	if config.GetWeights() == nil {
 		config.Weights = make(map[int32]int32)
 	}
+	if config.GetSleeves() == nil {
+		config.Sleeves = make(map[int32]rcpb.ReleaseMetadata_SleeveState)
+	}
 
 	defer func() {
+		sleeveCount := float64(0)
+		for _, state := range config.GetSleeves() {
+			if state == rcpb.ReleaseMetadata_VINYL_STORAGE_NO_INNER {
+				sleeveCount++
+			}
+		}
+		cwidths.Set(sleeveCount)
 		weightCount := make(map[string]float64)
 		for id, weight := range config.GetWeights() {
 			if weight > 0 {
@@ -320,6 +333,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		config.Folder[id] = rec.GetRelease().GetFolderId()
 		config.Keeps[id] = rec.GetMetadata().GetKeep()
 		config.Categories[id] = rec.GetMetadata().GetCategory()
+		config.Sleeves[id] = rec.GetMetadata().GetSleeve()
 
 		vfound := false
 		for _, value := range config.GetValues() {
