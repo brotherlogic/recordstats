@@ -140,15 +140,15 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		config.FiledTime = make(map[int32]int64)
 	}
 	if config.GetLbLastTime() == nil {
-		s.Log("RESTTING LB")
+		s.CtxLog(ctx, "RESTTING LB")
 		config.LbLastTime = make(map[int32]int64)
 	}
 	if config.GetLbLastTimeHigh() == nil {
-		s.Log("RESETTING LB HIGH")
+		s.CtxLog(ctx, "RESETTING LB HIGH")
 		config.LbLastTimeHigh = make(map[int32]int64)
 	}
 	if config.GetLastListen() == nil {
-		s.Log("RESETTING LB HIGH")
+		s.CtxLog(ctx, "RESETTING LB HIGH")
 		config.LastListen = make(map[int32]int64)
 	}
 	if config.GetKeeps() == nil {
@@ -314,7 +314,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 		}
 		oldestLBHigh.Set(float64(time.Since(time.Unix(laxhs, 0)).Seconds()))
-		s.Log(fmt.Sprintf("THE OLDEST LB HIGH is %v (%v) but %v (%v) AND (%v), (%v)", idhs, laxhs, id, lax, ll, idll))
+		s.CtxLog(ctx, fmt.Sprintf("THE OLDEST LB HIGH is %v (%v) but %v (%v) AND (%v), (%v)", idhs, laxhs, id, lax, ll, idll))
 	}()
 
 	if id > 1 {
@@ -468,7 +468,7 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 	}
 	oldestTime := time.Now().Unix()
 	var r *rcpb.Record
-	s.Log(fmt.Sprintf("Folders are %v", folders))
+	s.CtxLog(ctx, fmt.Sprintf("Folders are %v", folders))
 
 	for _, folder := range folders {
 		ids, err := s.getInstanceIds(ctx, folder)
@@ -488,7 +488,7 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 		}
 	}
 
-	s.Log(fmt.Sprintf("Found %v - %v", r.GetRelease().GetInstanceId(), r.GetRelease().GetTitle()))
+	s.CtxLog(ctx, fmt.Sprintf("Found %v - %v", r.GetRelease().GetInstanceId(), r.GetRelease().GetTitle()))
 	oldest.Set(float64(oldestTime))
 
 	return nil
