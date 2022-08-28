@@ -169,9 +169,11 @@ func (s *Server) update(ctx context.Context, id int32) error {
 
 	defer func() {
 		sleeveCount := float64(0)
-		for _, state := range config.GetSleeves() {
+		for id, state := range config.GetSleeves() {
 			if state == rcpb.ReleaseMetadata_VINYL_STORAGE_NO_INNER {
-				sleeveCount++
+				if config.GetCategories()[id] != rcpb.ReleaseMetadata_LISTED_TO_SELL && config.GetCategories()[id] != rcpb.ReleaseMetadata_SOLD_ARCHIVE {
+					sleeveCount++
+				}
 			}
 		}
 		cwidths.Set(sleeveCount)
