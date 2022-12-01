@@ -3,10 +3,10 @@ module github.com/brotherlogic/recordstats
 go 1.16
 
 require (
+	github.com/brotherlogic/dstore v0.0.0-20221201081019-c67329f43819 // indirect
 	github.com/brotherlogic/godiscogs v0.0.0-20221025153630-9ad31d9fab21
 	github.com/brotherlogic/goserver v0.0.0-20221106165541-0672428e3628
 	github.com/brotherlogic/keystore v0.0.0-20221130115203-6bad7488de7a
-	github.com/brotherlogic/logging v0.0.0-20221201072008-25fc22fa42d3 // indirect
 	github.com/brotherlogic/recordcollection v0.0.0-20221201071125-652672f2c311
 	github.com/brotherlogic/recordsorganiser v0.0.0-20221201071004-64af7d3e113c
 	github.com/golang/protobuf v1.5.2
