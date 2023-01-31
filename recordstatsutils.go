@@ -268,17 +268,14 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		rateFiled.Set(rate / 7)
 
 		lax := time.Now().Unix()
-		id := int32(-1)
-		for iid, v := range config.GetLbLastTime() {
+		for _, v := range config.GetLbLastTime() {
 			if v < lax {
 				lax = v
-				id = iid
 			}
 		}
 		oldestLBStaged.Set(float64(time.Since(time.Unix(lax, 0)).Seconds()))
 
 		ll := time.Now().Unix()
-		idll := int32(-1)
 		unlisten := float64(0)
 		listens := make([]int, 0)
 		last14 := float64(0)
@@ -293,7 +290,6 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 			if v < ll && v > 0 {
 				ll = v
-				idll = iid
 			}
 			if v == 0 {
 				unlisten++
@@ -314,26 +310,26 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		listenTotal.Set(float64(len(config.GetLastListen())) / (last14 / 14))
 
 		laxhs := time.Now().Unix()
-		idhs := int32(-1)
-		for iid, v := range config.GetLbLastTimeHigh() {
+		for _, v := range config.GetLbLastTimeHigh() {
 			if v < laxhs {
 				laxhs = v
-				idhs = iid
 			}
 		}
 		oldestLBHigh.Set(float64(time.Since(time.Unix(laxhs, 0)).Seconds()))
 
 		oldestInCollection := int64(math.MaxInt64)
+		boing := int32(0)
 		for iid, v := range config.GetLastListen() {
 			if config.GetCategories()[iid] == rcpb.ReleaseMetadata_IN_COLLECTION {
 				if v < int64(oldestInCollection) {
 					oldestInCollection = v
+					boing = iid
 				}
 			}
 		}
 		oldestIC.Set(float64(oldestInCollection))
 
-		s.CtxLog(ctx, fmt.Sprintf("THE OLDEST LB HIGH is %v (%v) but %v (%v) AND (%v), (%v)", idhs, laxhs, id, lax, ll, idll))
+		s.CtxLog(ctx, fmt.Sprintf("THE OLDEST IC IS %v", boing))
 	}()
 
 	if id > 1 {
