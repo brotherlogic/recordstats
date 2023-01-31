@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -32,7 +33,7 @@ func main() {
 	}
 
 	for i, id := range ids.GetInstanceIds() {
-		log.Printf("PING %v -> %v", i, id)
+		fmt.Printf("PING %v -> %v]n", i, id)
 		_, err = client.ClientUpdate(ctx2, &pbrc.ClientUpdateRequest{InstanceId: int32(id)})
 		if err != nil {
 			log.Fatalf("Error on GET: %v", err)
