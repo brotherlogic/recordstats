@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"sort"
 	"time"
 
@@ -18,6 +19,11 @@ import (
 var (
 	oldest = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_oldest",
+		Help: "The oldest physical record",
+	})
+
+	oldestIC = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_oldest_in_collection",
 		Help: "The oldest physical record",
 	})
 
@@ -316,6 +322,17 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 		}
 		oldestLBHigh.Set(float64(time.Since(time.Unix(laxhs, 0)).Seconds()))
+
+		oldestInCollection := int64(math.MaxInt64)
+		for iid, v := range config.GetLastListen() {
+			if config.GetCategories()[iid] == rcpb.ReleaseMetadata_IN_COLLECTION {
+				if v < int64(oldestInCollection) {
+					oldestInCollection = v
+				}
+			}
+		}
+		oldestIC.Set(float64(oldestInCollection))
+
 		s.CtxLog(ctx, fmt.Sprintf("THE OLDEST LB HIGH is %v (%v) but %v (%v) AND (%v), (%v)", idhs, laxhs, id, lax, ll, idll))
 	}()
 
