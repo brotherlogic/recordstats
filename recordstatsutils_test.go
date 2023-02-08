@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	gdpb "github.com/brotherlogic/godiscogs"
+	gdpb "github.com/brotherlogic/godiscogs/proto"
 	keystoreclient "github.com/brotherlogic/keystore/client"
 	rcc "github.com/brotherlogic/recordcollection/client"
 	rcpb "github.com/brotherlogic/recordcollection/proto"
