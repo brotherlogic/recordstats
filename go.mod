@@ -3,7 +3,7 @@ module github.com/brotherlogic/recordstats
 go 1.16
 
 require (
-	github.com/brotherlogic/discovery v0.0.0-20230902181933-1aab7e776fd1 // indirect
+	github.com/brotherlogic/discovery v0.0.0-20230902193302-520563d002e3 // indirect
 	github.com/brotherlogic/godiscogs v0.0.0-20230811151532-c0cd0f5b80c6
 	github.com/brotherlogic/goserver v0.0.0-20230726200050-779ae6811580
 	github.com/brotherlogic/keystore v0.0.0-20230901231139-d77459255d7a
