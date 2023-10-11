@@ -10,7 +10,7 @@ require (
 	github.com/brotherlogic/recordsorganiser v0.0.0-20230925205241-5e196767863e
 	github.com/golang/protobuf v1.5.3
 	github.com/prometheus/client_golang v1.16.0
-	golang.org/x/net v0.15.0
+	golang.org/x/net v0.17.0
 	google.golang.org/grpc v1.58.2
 	google.golang.org/protobuf v1.31.0
 )
