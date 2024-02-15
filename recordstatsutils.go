@@ -483,7 +483,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	return s.KSclient.Save(ctx, CONFIG, config)
 }
 
-func computeUnlistenedCDs(config pb.Config) {
+func computeUnlistenedCDs(config *pb.Config) {
 	count := 0
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
