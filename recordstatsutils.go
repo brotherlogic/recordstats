@@ -17,6 +17,11 @@ import (
 )
 
 var (
+	unlistenedCDs = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_unlistened_cds",
+		Help: "The oldest physical record",
+	})
+
 	oldest = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_oldest",
 		Help: "The oldest physical record",
@@ -174,6 +179,8 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	}
 
 	defer func() {
+		computeUnlistenedCDs(config)
+
 		sleeveCount := float64(0)
 		for id, state := range config.GetSleeves() {
 			if state == rcpb.ReleaseMetadata_VINYL_STORAGE_NO_INNER {
@@ -474,6 +481,18 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	}
 
 	return s.KSclient.Save(ctx, CONFIG, config)
+}
+
+func computeUnlistenedCDs(config pb.Config) {
+	count := 0
+	for id, val := range config.GetCategories() {
+		if val == rcpb.ReleaseMetadata_UNLISTENED {
+			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_CD {
+				count++
+			}
+		}
+	}
+	unlistenedCDs.Set(float64(count))
 }
 
 func (s *Server) computeOldest(ctx context.Context) (err error) {
