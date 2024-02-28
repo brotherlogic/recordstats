@@ -353,6 +353,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				delete(config.LastListen, id)
 				delete(config.LbLastTimeHigh, id)
 				delete(config.LbLastTime, id)
+				delete(config.Categories, id)
 				return s.KSclient.Save(ctx, CONFIG, config)
 			}
 			return err

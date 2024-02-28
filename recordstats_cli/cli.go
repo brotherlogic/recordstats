@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/brotherlogic/goserver/utils"
@@ -20,6 +22,18 @@ func main() {
 	}
 	client := pbrc.NewClientUpdateServiceClient(conn)
 
+	if len(os.Args) > 1 {
+		val, err := strconv.ParseInt(os.Args[1], 10, 32)
+		if err != nil {
+			log.Fatalf("Bad: %v", os.Args[1])
+		}
+		_, err = client.ClientUpdate(ctx2, &pbrc.ClientUpdateRequest{InstanceId: int32(val)})
+		if err != nil {
+			log.Fatalf("Error on GET: %v", err)
+		}
+		return
+	}
+
 	conn2, err := utils.LFDialServer(ctx2, "recordcollection")
 	if err != nil {
 		log.Fatalf("Cannot reach rc: %v", err)
@@ -33,7 +47,7 @@ func main() {
 	}
 
 	for i, id := range ids.GetInstanceIds() {
-		fmt.Printf("PING %v -> %v]n", i, id)
+		fmt.Printf("PING %v/%v -> %v\n", i, len(ids.GetInstanceIds()), id)
 		_, err = client.ClientUpdate(ctx2, &pbrc.ClientUpdateRequest{InstanceId: int32(id)})
 		if err != nil {
 			log.Fatalf("Error on GET: %v", err)
