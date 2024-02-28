@@ -129,6 +129,10 @@ var (
 		Name: "recordstats_weights",
 		Help: "Records that have weights",
 	}, []string{"category"})
+
+	cdsToListen = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_cdstogo",
+	})
 )
 
 const (
@@ -179,7 +183,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	}
 
 	defer func() {
-		computeUnlistenedCDs(config)
+		s.computeUnlistenedCDs(ctx, config)
 
 		sleeveCount := float64(0)
 		for id, state := range config.GetSleeves() {
@@ -483,11 +487,12 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	return s.KSclient.Save(ctx, CONFIG, config)
 }
 
-func computeUnlistenedCDs(config *pb.Config) {
+func (s *Server) computeUnlistenedCDs(ctx context.Context, config *pb.Config) {
 	count := 0
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_CD {
+				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v", id))
 				count++
 			}
 		}
