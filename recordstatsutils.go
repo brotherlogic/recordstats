@@ -491,7 +491,7 @@ func (s *Server) computeUnlistenedCDs(ctx context.Context, config *pb.Config) {
 	count := 0
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
-			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_CD {
+			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_CD && config.GetWeights()[id] == 0 {
 				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v", id))
 				count++
 			}
