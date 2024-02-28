@@ -181,6 +181,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	if config.GetSleeves() == nil {
 		config.Sleeves = make(map[int32]rcpb.ReleaseMetadata_SleeveState)
 	}
+	if config.GetIsDirty() == nil {
+		config.IsDirty = make(map[int32]bool)
+	}
 
 	defer func() {
 		s.computeUnlistenedCDs(ctx, config)
@@ -355,6 +358,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			return err
 		}
 
+		config.IsDirty[id] = rec.GetMetadata().GetDirty()
 		config.Weights[id] = rec.GetMetadata().GetWeightInGrams()
 		config.Folder[id] = rec.GetRelease().GetFolderId()
 		config.Keeps[id] = rec.GetMetadata().GetKeep()
@@ -491,7 +495,7 @@ func (s *Server) computeUnlistenedCDs(ctx context.Context, config *pb.Config) {
 	count := 0
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
-			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_CD && config.GetWeights()[id] == 0 {
+			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_CD && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
 				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v", id))
 				count++
 			}
