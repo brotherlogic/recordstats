@@ -22,6 +22,7 @@ message Config {
   map<int32, int32> weights = 13;
   map<int32, recordcollection.ReleaseMetadata.SleeveState> sleeves = 14;
   map<int32, bool> is_dirty = 15;
+  map<int32, int32> score = 16;
 }
 
 message Values {

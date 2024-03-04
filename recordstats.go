@@ -16,7 +16,7 @@ import (
 	pb "github.com/brotherlogic/recordstats/proto"
 )
 
-//Server main server type
+// Server main server type
 type Server struct {
 	*goserver.GoServer
 	rcclient *rcc.RecordCollectionClient
