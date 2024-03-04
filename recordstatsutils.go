@@ -184,6 +184,9 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	if config.GetIsDirty() == nil {
 		config.IsDirty = make(map[int32]bool)
 	}
+	if config.GetScore() == nil {
+		config.Score = make(map[int32]int32)
+	}
 
 	defer func() {
 		s.computeUnlistenedCDs(ctx, config)
@@ -365,6 +368,14 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		config.Keeps[id] = rec.GetMetadata().GetKeep()
 		config.Categories[id] = rec.GetMetadata().GetCategory()
 		config.Sleeves[id] = rec.GetMetadata().GetSleeve()
+		config.Score[id] = rec.GetRelease().GetRating()
+		if rec.GetMetadata().GetSetRating() != 0 {
+			if rec.GetMetadata().GetSetRating() < 0 {
+				config.Score[id] = 0
+			} else {
+				config.Score[id] = rec.GetMetadata().GetSetRating()
+			}
+		}
 
 		vfound := false
 		for _, value := range config.GetValues() {
@@ -496,7 +507,7 @@ func (s *Server) computeUnlistenedCDs(ctx context.Context, config *pb.Config) {
 	count := 0
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
-			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_CD && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
+			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_CD && config.GetScore()[id] == 0 && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
 				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v", id))
 				count++
 			}
