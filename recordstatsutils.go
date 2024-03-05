@@ -376,6 +376,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				config.Score[id] = rec.GetMetadata().GetSetRating()
 			}
 		}
+		s.CtxLog(ctx, fmt.Sprintf("Score (%v) -> %v", id, config.Score[id]))
 
 		vfound := false
 		for _, value := range config.GetValues() {
@@ -508,7 +509,7 @@ func (s *Server) computeUnlistenedCDs(ctx context.Context, config *pb.Config) {
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_CD && config.GetScore()[id] == 0 && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
-				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v", id))
+				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v (%v)", id, config.GetScore()[id]))
 				count++
 			}
 		}
