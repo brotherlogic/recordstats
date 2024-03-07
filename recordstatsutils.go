@@ -194,6 +194,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 
 	defer func() {
 		s.computeUnlistenedCDs(ctx, config)
+		s.computeUnlistenedDigital(ctx, config)
 
 		sleeveCount := float64(0)
 		for id, state := range config.GetSleeves() {
