@@ -21,6 +21,10 @@ var (
 		Name: "recordstats_unlistened_cds",
 		Help: "The oldest physical record",
 	})
+	unlistenedDigital = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_unlistened_digital",
+		Help: "The oldest physical record",
+	})
 
 	oldest = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_oldest",
@@ -515,6 +519,18 @@ func (s *Server) computeUnlistenedCDs(ctx context.Context, config *pb.Config) {
 		}
 	}
 	unlistenedCDs.Set(float64(count))
+}
+
+func (s *Server) computeUnlistenedDigital(ctx context.Context, config *pb.Config) {
+	count := 0
+	for id, val := range config.GetCategories() {
+		if val == rcpb.ReleaseMetadata_UNLISTENED {
+			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_DIGITAL && config.GetScore()[id] == 0 && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
+				count++
+			}
+		}
+	}
+	unlistenedDigital.Set(float64(count))
 }
 
 func (s *Server) computeOldest(ctx context.Context) (err error) {
