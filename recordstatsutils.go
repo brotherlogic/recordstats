@@ -194,6 +194,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 
 	defer func() {
 		s.computeUnlistenedCDs(ctx, config)
+		s.computeUnlistenedDigital(ctx, config)
 
 		sleeveCount := float64(0)
 		for id, state := range config.GetSleeves() {
@@ -525,6 +526,7 @@ func (s *Server) computeUnlistenedDigital(ctx context.Context, config *pb.Config
 	count := 0
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
+			s.CtxLog(ctx, fmt.Sprintf("FOUND_DIG: %v -> %v", id, config.GetFiled()[id]))
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_DIGITAL && config.GetScore()[id] == 0 && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
 				count++
 			}
