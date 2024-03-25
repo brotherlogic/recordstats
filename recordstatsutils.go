@@ -21,6 +21,10 @@ var (
 		Name: "recordstats_unlistened_cds",
 		Help: "The oldest physical record",
 	})
+	unlistened45s = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_unlistened_45s",
+		Help: "The oldest physical record",
+	})
 	unlistenedDigital = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_unlistened_digital",
 		Help: "The oldest physical record",
@@ -194,6 +198,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 
 	defer func() {
 		s.computeUnlistenedCDs(ctx, config)
+		s.computeUnlistened45s(ctx, config)
 		s.computeUnlistenedDigital(ctx, config)
 
 		sleeveCount := float64(0)
@@ -520,6 +525,19 @@ func (s *Server) computeUnlistenedCDs(ctx context.Context, config *pb.Config) {
 		}
 	}
 	unlistenedCDs.Set(float64(count))
+}
+
+func (s *Server) computeUnlistened45s(ctx context.Context, config *pb.Config) {
+	count := 0
+	for id, val := range config.GetCategories() {
+		if val == rcpb.ReleaseMetadata_UNLISTENED {
+			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH && config.GetScore()[id] == 0 && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
+				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v (%v)", id, config.GetScore()[id]))
+				count++
+			}
+		}
+	}
+	unlistened45s.Set(float64(count))
 }
 
 func (s *Server) computeUnlistenedDigital(ctx context.Context, config *pb.Config) {
