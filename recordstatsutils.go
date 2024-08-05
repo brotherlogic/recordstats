@@ -207,6 +207,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	defer func() {
 		s.computeUnlistenedCDs(ctx, config)
 		s.computeUnlistened45s(ctx, config)
+		s.computeUnlistened12s(ctx, config)
 		s.computeUnlistenedDigital(ctx, config)
 
 		sleeveCount := float64(0)
@@ -552,11 +553,7 @@ func (s *Server) computeUnlistened45s(ctx context.Context, config *pb.Config) {
 	count := 0
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED || val == rcpb.ReleaseMetadata_ARRIVED {
-<<<<<<< Updated upstream
-			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH && config.GetScore()[id] == 0 && !config.GetIsDirty()[id] {
-=======
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH && config.GetScore()[id] == 0 && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
->>>>>>> Stashed changes
 				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v (%v)", id, config.GetScore()[id]))
 				count++
 			}
