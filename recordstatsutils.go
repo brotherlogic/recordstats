@@ -128,10 +128,6 @@ var (
 		Name: "recordstats_average_value",
 		Help: "The number of records processed",
 	}, []string{"category", "filed"})
-	fcount = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "recordstats_average_value",
-		Help: "The number of records processed",
-	}, []string{"category", "filed"})
 
 	keeps = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "recordstats_keepers",
