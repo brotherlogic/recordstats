@@ -21,6 +21,10 @@ var (
 		Name: "recordstats_unlistened_cds",
 		Help: "The oldest physical record",
 	})
+	unlistened12s = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_unlistened_12s",
+		Help: "The oldest physical record",
+	})
 	unlistened45s = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_unlistened_45s",
 		Help: "The oldest physical record",
@@ -121,6 +125,10 @@ var (
 	}, []string{"category", "filed"})
 
 	aValue = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "recordstats_average_value",
+		Help: "The number of records processed",
+	}, []string{"category", "filed"})
+	fcount = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "recordstats_average_value",
 		Help: "The number of records processed",
 	}, []string{"category", "filed"})
@@ -527,11 +535,28 @@ func (s *Server) computeUnlistenedCDs(ctx context.Context, config *pb.Config) {
 	unlistenedCDs.Set(float64(count))
 }
 
+func (s *Server) computeUnlistened12s(ctx context.Context, config *pb.Config) {
+	count := 0
+	for id, val := range config.GetCategories() {
+		if val == rcpb.ReleaseMetadata_UNLISTENED {
+			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_12_INCH && config.GetScore()[id] == 0 && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
+				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v (%v)", id, config.GetScore()[id]))
+				count++
+			}
+		}
+	}
+	unlistened12s.Set(float64(count))
+}
+
 func (s *Server) computeUnlistened45s(ctx context.Context, config *pb.Config) {
 	count := 0
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED || val == rcpb.ReleaseMetadata_ARRIVED {
+<<<<<<< Updated upstream
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH && config.GetScore()[id] == 0 && !config.GetIsDirty()[id] {
+=======
+			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH && config.GetScore()[id] == 0 && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
+>>>>>>> Stashed changes
 				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v (%v)", id, config.GetScore()[id]))
 				count++
 			}
