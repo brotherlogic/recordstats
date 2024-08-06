@@ -535,6 +535,7 @@ func (s *Server) computeUnlistenedCDs(ctx context.Context, config *pb.Config) {
 func (s *Server) computeUnlistened12s(ctx context.Context, config *pb.Config) {
 	count := 0
 	for id, val := range config.GetCategories() {
+		s.CtxLog(ctx, fmt.Sprintf("%v %v", id, config.GetFiled()[id]))
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_12_INCH && config.GetScore()[id] == 0 && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
 				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v (%v)", id, config.GetScore()[id]))
@@ -553,6 +554,10 @@ func (s *Server) computeUnlistened45s(ctx context.Context, config *pb.Config) {
 				s.CtxLog(ctx, fmt.Sprintf("FOUND_45 %v (%v)", id, config.GetScore()[id]))
 				count++
 			}
+		}
+
+		if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH {
+			s.CtxLog(ctx, fmt.Sprintf("FOUND_45 %v", id))
 		}
 	}
 	unlistened45s.Set(float64(count))
