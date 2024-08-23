@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -132,7 +133,7 @@ var (
 	categories = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "recordstats_categories",
 		Help: "The number of records kept",
-	}, []string{"category"})
+	}, []string{"category", "filed"})
 	withWeight = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "recordstats_weights",
 		Help: "Records that have weights",
@@ -231,11 +232,12 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		}
 
 		catCount := make(map[string]float64)
-		for _, value := range config.GetCategories() {
-			catCount[value.Enum().String()]++
+		for id, value := range config.GetCategories() {
+			catCount[fmt.Sprintf("%v|%v", value, config.GetFiled()[id])]++
 		}
 		for category, count := range catCount {
-			categories.With(prometheus.Labels{"category": category}).Set(count)
+			elems := strings.Split(category, "|")
+			categories.With(prometheus.Labels{"category": elems[0], "filed": elems[1]}).Set(count)
 		}
 
 		for _, value := range config.GetValues() {
