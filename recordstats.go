@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/brotherlogic/goserver"
@@ -145,8 +146,12 @@ func main() {
 		return
 	}
 
-	ctx2, cancel2 := utils.ManualContext("recordbudget-trigger", time.Minute)
+	ctx2, cancel2 := utils.ManualContext("recordbudget-trigger", time.Hour)
 	server.update(ctx2, 1)
+	err = server.cleanCategories(ctx2)
+	if err != nil {
+		log.Fatalf("Unable to clean categories: %v", err)
+	}
 	cancel2()
 
 	fmt.Printf("%v", server.Serve())

@@ -153,6 +153,23 @@ const (
 	CONFIG = "/github.com/brotherlogic/recordstats/config"
 )
 
+func (s *Server) cleanCategories(ctx context.Context) error {
+	data, _, err := s.KSclient.Read(ctx, CONFIG, &pb.Config{})
+	if err != nil {
+		return err
+	}
+	config := data.(*pb.Config)
+
+	for id := range config.GetCategories() {
+		_, err := s.getRecord(ctx, id)
+		if status.Code(err) == codes.OutOfRange {
+			delete(config.Categories, id)
+		}
+	}
+
+	return s.KSclient.Save(ctx, CONFIG, config)
+}
+
 func (s *Server) update(ctx context.Context, id int32) error {
 	data, _, err := s.KSclient.Read(ctx, CONFIG, &pb.Config{})
 	if err != nil {
