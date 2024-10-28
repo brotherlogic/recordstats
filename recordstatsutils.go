@@ -540,7 +540,7 @@ func (s *Server) computeUnlistened12s(ctx context.Context, config *pb.Config) {
 		s.CtxLog(ctx, fmt.Sprintf("%v %v", id, config.GetFiled()[id]))
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_12_INCH && config.GetScore()[id] == 0 && !config.GetIsDirty()[id] {
-				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v (%v)", id, config.GetScore()[id]))
+				s.CtxLog(ctx, fmt.Sprintf("FOUND_12 %v (%v)", id, config.GetScore()[id]))
 				count++
 			}
 		}
@@ -552,7 +552,7 @@ func (s *Server) computeUnlistened45s(ctx context.Context, config *pb.Config) {
 	count := 0
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED || val == rcpb.ReleaseMetadata_ARRIVED {
-			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH && config.GetScore()[id] == 0  && !config.GetIsDirty()[id] {
+			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH && config.GetScore()[id] == 0 && !config.GetIsDirty()[id] {
 				s.CtxLog(ctx, fmt.Sprintf("FOUND_45 %v (%v)", id, config.GetScore()[id]))
 				count++
 			}
