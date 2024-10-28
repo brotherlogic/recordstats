@@ -146,7 +146,7 @@ func main() {
 		return
 	}
 
-	ctx2, cancel2 := utils.ManualContext("recordbudget-trigger", time.Hour)
+	ctx2, cancel2 := utils.ManualContext("recordbudget-trigger", time.Minute*5)
 	server.update(ctx2, 1)
 	err = server.cleanCategories(ctx2)
 	if err != nil {
