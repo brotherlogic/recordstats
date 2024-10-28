@@ -152,6 +152,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to clean categories: %v", err)
 	}
+	server.CtxLog(ctx2, fmt.Sprintf("Cleaned categories: %v", err))
 	cancel2()
 
 	fmt.Printf("%v", server.Serve())
