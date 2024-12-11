@@ -459,13 +459,8 @@ func (s *Server) update(ctx context.Context, id int32) error {
 
 		exist, ok := config.Filed[id]
 		config.Filed[id] = rec.Metadata.GetFiledUnder()
-		if rec.GetMetadata().GetCategory() == rcpb.ReleaseMetadata_SOLD_ARCHIVE {
-			delete(config.Filed, id)
-			delete(config.FiledTime, id)
-		} else {
-			if (!ok || exist == rcpb.ReleaseMetadata_FILE_UNKNOWN) && rec.GetMetadata().GetFiledUnder() != rcpb.ReleaseMetadata_FILE_UNKNOWN {
-				config.FiledTime[id] = time.Now().Unix()
-			}
+		if (!ok || exist == rcpb.ReleaseMetadata_FILE_UNKNOWN) && rec.GetMetadata().GetFiledUnder() != rcpb.ReleaseMetadata_FILE_UNKNOWN {
+			config.FiledTime[id] = time.Now().Unix()
 		}
 
 		found := false
