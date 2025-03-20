@@ -7,7 +7,7 @@ require (
 	github.com/brotherlogic/goserver v0.0.0-20250123145056-95c6fbb2310a
 	github.com/brotherlogic/keystore v0.0.0-20240508161349-814b3200b126
 	github.com/brotherlogic/recordcollection v0.0.0-20250227174213-ce20ec909d87
-	github.com/brotherlogic/recordsorganiser v0.0.0-20250320100056-1fff5b2b8a2a
+	github.com/brotherlogic/recordsorganiser v0.0.0-20250320130419-dbadf673c7c1
 	github.com/prometheus/client_golang v1.21.1
 	golang.org/x/net v0.37.0
 	google.golang.org/grpc v1.71.0
@@ -16,15 +16,15 @@ require (
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/brotherlogic/buildserver v0.0.0-20250320120444-ee63483ca63b // indirect
+	github.com/brotherlogic/buildserver v0.0.0-20250320135930-9ac4c7d442f2 // indirect
 	github.com/brotherlogic/datastore v0.0.0-20250313015544-917b63bdd6ff // indirect
 	github.com/brotherlogic/discovery v0.0.0-20241109204028-02908558af09 // indirect
-	github.com/brotherlogic/dstore v0.0.0-20250320124611-642bea6babcb // indirect
-	github.com/brotherlogic/githubcard v0.0.0-20250320125840-e6efcb4ccb6e // indirect
-	github.com/brotherlogic/githubridge v0.2849.0 // indirect
-	github.com/brotherlogic/gobuildslave v0.0.0-20250320125747-65290dbdbfcb // indirect
-	github.com/brotherlogic/lock v0.0.0-20250320115354-78f471c70e26 // indirect
-	github.com/brotherlogic/logging v0.0.0-20250320125732-37c83909428b // indirect
+	github.com/brotherlogic/dstore v0.0.0-20250320135932-47eb24f63e7a // indirect
+	github.com/brotherlogic/githubcard v0.0.0-20250320135653-69ad56c0baac // indirect
+	github.com/brotherlogic/githubridge v0.2850.0 // indirect
+	github.com/brotherlogic/gobuildslave v0.0.0-20250320134630-8bf1d19385f1 // indirect
+	github.com/brotherlogic/lock v0.0.0-20250320130332-70a0aa5925b4 // indirect
+	github.com/brotherlogic/logging v0.0.0-20250320135643-7e73d68682ce // indirect
 	github.com/brotherlogic/monitor v0.0.0-20221025152653-c10877c5f9e6 // indirect
 	github.com/brotherlogic/versionserver v0.0.0-20221025154054-c9bcd41be2f2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
