@@ -143,14 +143,5 @@ func main() {
 		return
 	}
 
-	/*ctx2, cancel2 := utils.ManualContext("recordbudget-trigger", time.Minute*5)
-	server.update(ctx2, 1)
-	err = server.cleanCategories(ctx2)
-	if err != nil {
-		log.Fatalf("Unable to clean categories: %v", err)
-	}
-	server.CtxLog(ctx2, fmt.Sprintf("Cleaned categories: %v", err))
-	cancel2()
-	*/
 	fmt.Printf("%v", server.Serve())
 }
