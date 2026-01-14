@@ -2,16 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"time"
 
 	"github.com/brotherlogic/goserver"
-	"golang.org/x/exp/rand"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pbg "github.com/brotherlogic/goserver/proto"
-	"github.com/brotherlogic/goserver/utils"
 	rcc "github.com/brotherlogic/recordcollection/client"
 	rcpb "github.com/brotherlogic/recordcollection/proto"
 	ropb "github.com/brotherlogic/recordsorganiser/proto"
@@ -146,18 +142,6 @@ func main() {
 	if err != nil {
 		return
 	}
-
-	ctx2, cancel2 := utils.ManualContext("recordbudget-trigger", time.Minute*5)
-	server.update(ctx2, 1)
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	if r.Float32() > 0.5 {
-		err = server.cleanCategories(ctx2)
-		if err != nil {
-			log.Fatalf("Unable to clean categories: %v", err)
-		}
-		server.CtxLog(ctx2, fmt.Sprintf("Cleaned categories: %v", err))
-	}
-	cancel2()
 
 	fmt.Printf("%v", server.Serve())
 }
