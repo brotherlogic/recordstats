@@ -146,6 +146,10 @@ var (
 	cdsToListen = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_cdstogo",
 	})
+
+	ripped = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "recordstats_ripped",
+	}, []string{"ripped"})
 )
 
 const (
@@ -217,12 +221,16 @@ func (s *Server) update(ctx context.Context, id int32) error {
 	if config.GetScore() == nil {
 		config.Score = make(map[int32]int32)
 	}
+	if config.GetLastRipDates() == nil {
+		config.LastRipDates = make(map[int32]int64)
+	}
 
 	defer func() {
 		s.computeUnlistenedCDs(ctx, config)
 		s.computeUnlistened45s(ctx, config)
 		s.computeUnlistened12s(ctx, config)
 		s.computeUnlistenedDigital(ctx, config)
+		s.computeLastRips(ctx, config)
 
 		sleeveCount := float64(0)
 		for id, state := range config.GetSleeves() {
@@ -620,4 +628,24 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 	oldest.Set(float64(oldestTime))
 
 	return nil
+}
+
+func (s *Server) computeLastRips(ctx context.Context, config *pb.Config) {
+	cripped := 0
+	notRipped := 0
+
+	for id, category := range config.GetCategories() {
+		if category != rcpb.ReleaseMetadata_SOLD_ARCHIVE && category != rcpb.ReleaseMetadata_LISTED_TO_SELL {
+			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_12_INCH || config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH || config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_TAPE {
+				if config.GetLastRipDates()[id] > 0 {
+					cripped++
+				} else {
+					notRipped++
+				}
+			}
+		}
+	}
+
+	ripped.With(prometheus.Labels{"ripped": "ripped"}).Set(float64(cripped))
+	ripped.With(prometheus.Labels{"ripped": "notripped"}).Set(float64(notRipped))
 }
