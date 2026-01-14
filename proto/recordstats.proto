@@ -23,6 +23,7 @@ message Config {
   map<int32, recordcollection.ReleaseMetadata.SleeveState> sleeves = 14;
   map<int32, bool> is_dirty = 15;
   map<int32, int32> score = 16;
+  map<int32, int64> last_rip_dates = 17;
 }
 
 message Values {
