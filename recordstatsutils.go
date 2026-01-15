@@ -150,6 +150,14 @@ var (
 	ripped = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "recordstats_ripped",
 	}, []string{"ripped"})
+
+	rippedInLastTwoWeeks = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_rippped_2w",
+	})
+
+	rippedCompletion = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordstats_rip_completion",
+	})
 )
 
 const (
@@ -635,11 +643,15 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 func (s *Server) computeLastRips(ctx context.Context, config *pb.Config) {
 	cripped := 0
 	notRipped := 0
+	last2w := 0
 
 	for id, category := range config.GetCategories() {
 		if category != rcpb.ReleaseMetadata_SOLD_ARCHIVE && category != rcpb.ReleaseMetadata_LISTED_TO_SELL {
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_12_INCH || config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH || config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_TAPE {
 				if config.GetLastRipDates()[id] > 0 {
+					if time.Since(time.Unix(config.GetLastRipDates()[id], 0)) < time.Hour*24*14 {
+						last2w++
+					}
 					cripped++
 				} else {
 					notRipped++
@@ -650,4 +662,9 @@ func (s *Server) computeLastRips(ctx context.Context, config *pb.Config) {
 
 	ripped.With(prometheus.Labels{"ripped": "ripped"}).Set(float64(cripped))
 	ripped.With(prometheus.Labels{"ripped": "notripped"}).Set(float64(notRipped))
+	rippedInLastTwoWeeks.Set(float64(last2w))
+
+	perDay := float64(last2w) / 14.0
+	daysToDo := float64(notRipped) / perDay
+	rippedCompletion.Set(float64(time.Now().Unix()) + daysToDo*24*60*60)
 }
