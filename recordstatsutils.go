@@ -536,6 +536,8 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			config.LastListenTime = rec.GetMetadata().GetLastListenTime()
 			oldest.Set(float64(config.LastListenTime))
 		}
+
+		config.LastRipDates[rec.GetRelease().GetInstanceId()] = rec.GetMetadata().GetLastRipDate()
 	}
 
 	return s.KSclient.Save(ctx, CONFIG, config)
