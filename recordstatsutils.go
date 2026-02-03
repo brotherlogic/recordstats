@@ -334,11 +334,11 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		listens := make([]int, 0)
 		last14 := float64(0)
 		today := float64(0)
-		listenCategory := make(map[rcpb.ReleaseMetadata_Category]float64)
+		listenCategory := make(map[rcpb.ReleaseMetadata_FileSize]float64)
 		for iid, v := range config.GetLastListen() {
 			if time.Since(time.Unix(v, 0)) < time.Hour*24*14 {
 				last14++
-				listenCategory[config.GetCategories()[iid]]++
+				listenCategory[config.GetFiled()[iid]]++
 			}
 			if time.Since(time.Unix(v, 0)) < time.Hour*24 {
 				s.CtxLog(ctx, fmt.Sprintf("FOUND TODAY: %v", iid))
