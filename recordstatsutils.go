@@ -103,6 +103,9 @@ var (
 	listenRate = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_listen_rate",
 	})
+	listenCategoryRate = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "recordstats_listen_category_rate",
+	}, []string{"category"})
 	listenTodayRate = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "recordstats_listen_today_rate",
 	})
@@ -331,9 +334,11 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		listens := make([]int, 0)
 		last14 := float64(0)
 		today := float64(0)
+		listenCategory := make(map[rcpb.ReleaseMetadata_Category]float64)
 		for iid, v := range config.GetLastListen() {
 			if time.Since(time.Unix(v, 0)) < time.Hour*24*14 {
 				last14++
+				listenCategory[config.GetCategories()[iid]]++
 			}
 			if time.Since(time.Unix(v, 0)) < time.Hour*24 {
 				s.CtxLog(ctx, fmt.Sprintf("FOUND TODAY: %v", iid))
@@ -359,6 +364,10 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		listenTodayRate.Set(float64(today))
 		listenRate.Set(float64(last14 / 14))
 		listenTotal.Set(float64(len(config.GetLastListen())) / (last14 / 14))
+
+		for cat, val := range listenCategory {
+			listenCategoryRate.With(prometheus.Labels{"category": cat.String()}).Set(val / 14)
+		}
 
 		laxhs := time.Now().Unix()
 		for _, v := range config.GetLbLastTimeHigh() {
