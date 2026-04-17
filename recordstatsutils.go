@@ -391,7 +391,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 
 		oldestInCollection := int64(math.MaxInt64)
 
-		for _, v := range config.GetLastListen() {
+		for iid, v := range config.GetLastListen() {
 			if config.GetCategories()[iid] == rcpb.ReleaseMetadata_IN_COLLECTION {
 				if v < int64(oldestInCollection) {
 					oldestInCollection = v
@@ -399,7 +399,6 @@ func (s *Server) update(ctx context.Context, id int32) error {
 			}
 		}
 		oldestIC.Set(float64(oldestInCollection))
-
 
 	}()
 
@@ -430,7 +429,6 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				config.Score[id] = rec.GetMetadata().GetSetRating()
 			}
 		}
-
 
 		vfound := false
 		for _, value := range config.GetValues() {
@@ -588,7 +586,6 @@ func (s *Server) computeUnlistened45s(ctx context.Context, config *pb.Config) {
 			}
 		}
 
-
 	}
 	unlistened45s.Set(float64(count))
 }
@@ -613,8 +610,6 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 	}
 	oldestTime := time.Now().Unix()
 
-
-
 	for _, folder := range folders {
 		ids, err := s.getInstanceIds(ctx, folder)
 		if err != nil {
@@ -628,11 +623,9 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 			}
 			if rec.GetMetadata().GetLastListenTime() < oldestTime {
 				oldestTime = rec.GetMetadata().GetLastListenTime()
-				r = rec
 			}
 		}
 	}
-
 
 	oldest.Set(float64(oldestTime))
 
