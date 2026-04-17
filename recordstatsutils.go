@@ -200,15 +200,12 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		config.FiledTime = make(map[int32]int64)
 	}
 	if config.GetLbLastTime() == nil {
-		s.CtxLog(ctx, "RESTTING LB")
 		config.LbLastTime = make(map[int32]int64)
 	}
 	if config.GetLbLastTimeHigh() == nil {
-		s.CtxLog(ctx, "RESETTING LB HIGH")
 		config.LbLastTimeHigh = make(map[int32]int64)
 	}
 	if config.GetLastListen() == nil {
-		s.CtxLog(ctx, "RESETTING LB HIGH")
 		config.LastListen = make(map[int32]int64)
 	}
 	if config.GetKeeps() == nil {
@@ -357,7 +354,6 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				listenCategory[config.GetFiled()[iid]]++
 			}
 			if time.Since(time.Unix(v, 0)) < time.Hour*24 {
-				s.CtxLog(ctx, fmt.Sprintf("FOUND TODAY: %v", iid))
 				today++
 			}
 			if v < ll && v > 0 {
@@ -394,18 +390,17 @@ func (s *Server) update(ctx context.Context, id int32) error {
 		oldestLBHigh.Set(float64(time.Since(time.Unix(laxhs, 0)).Seconds()))
 
 		oldestInCollection := int64(math.MaxInt64)
-		boing := int32(0)
-		for iid, v := range config.GetLastListen() {
+
+		for _, v := range config.GetLastListen() {
 			if config.GetCategories()[iid] == rcpb.ReleaseMetadata_IN_COLLECTION {
 				if v < int64(oldestInCollection) {
 					oldestInCollection = v
-					boing = iid
 				}
 			}
 		}
 		oldestIC.Set(float64(oldestInCollection))
 
-		s.CtxLog(ctx, fmt.Sprintf("THE OLDEST IC IS %v", boing))
+
 	}()
 
 	if id > 1 {
@@ -435,7 +430,7 @@ func (s *Server) update(ctx context.Context, id int32) error {
 				config.Score[id] = rec.GetMetadata().GetSetRating()
 			}
 		}
-		s.CtxLog(ctx, fmt.Sprintf("Score (%v) -> %v", id, config.Score[id]))
+
 
 		vfound := false
 		for _, value := range config.GetValues() {
@@ -565,7 +560,6 @@ func (s *Server) computeUnlistenedCDs(ctx context.Context, config *pb.Config) {
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_CD && config.GetScore()[id] == 0 && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
-				s.CtxLog(ctx, fmt.Sprintf("FOUND_CD %v (%v)", id, config.GetScore()[id]))
 				count++
 			}
 		}
@@ -578,7 +572,6 @@ func (s *Server) computeUnlistened12s(ctx context.Context, config *pb.Config) {
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_12_INCH && config.GetScore()[id] == 0 && !config.GetIsDirty()[id] {
-				s.CtxLog(ctx, fmt.Sprintf("FOUND_12 %v (%v)", id, config.GetScore()[id]))
 				count++
 			}
 		}
@@ -591,14 +584,11 @@ func (s *Server) computeUnlistened45s(ctx context.Context, config *pb.Config) {
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED || val == rcpb.ReleaseMetadata_ARRIVED {
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH && config.GetScore()[id] == 0 && !config.GetIsDirty()[id] {
-				s.CtxLog(ctx, fmt.Sprintf("FOUND_45 %v (%v)", id, config.GetScore()[id]))
 				count++
 			}
 		}
 
-		if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_7_INCH {
-			s.CtxLog(ctx, fmt.Sprintf("FOUND_45 %v", id))
-		}
+
 	}
 	unlistened45s.Set(float64(count))
 }
@@ -607,7 +597,7 @@ func (s *Server) computeUnlistenedDigital(ctx context.Context, config *pb.Config
 	count := 0
 	for id, val := range config.GetCategories() {
 		if val == rcpb.ReleaseMetadata_UNLISTENED {
-			s.CtxLog(ctx, fmt.Sprintf("FOUND_DIG: %v -> %v", id, config.GetFiled()[id]))
+
 			if config.GetFiled()[id] == rcpb.ReleaseMetadata_FILE_DIGITAL && config.GetScore()[id] == 0 && config.GetWeights()[id] == 0 && !config.GetIsDirty()[id] {
 				count++
 			}
@@ -622,8 +612,8 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 		return err
 	}
 	oldestTime := time.Now().Unix()
-	var r *rcpb.Record
-	s.CtxLog(ctx, fmt.Sprintf("Folders are %v", folders))
+
+
 
 	for _, folder := range folders {
 		ids, err := s.getInstanceIds(ctx, folder)
@@ -643,7 +633,7 @@ func (s *Server) computeOldest(ctx context.Context) (err error) {
 		}
 	}
 
-	s.CtxLog(ctx, fmt.Sprintf("Found %v - %v", r.GetRelease().GetInstanceId(), r.GetRelease().GetTitle()))
+
 	oldest.Set(float64(oldestTime))
 
 	return nil
